@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Registro de oferente')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <div class="form w50">
+        <form method="POST" action="/registro/oferente"
+              th:object="${oferente}">
+            <div class="section">Datos de acceso</div>
+            <div>
+                <div class="label">Correo</div>
+                <div class="field">
+                    <input type="email" th:field="*{usuario.correo}"/>
+                    <span th:if="${#fields.hasErrors('usuario.correo')}"
+                          th:errors="*{usuario.correo}" class="error"></span>
+                </div>
+            </div>
+            <div>
+                <div class="label">Clave</div>
+                <div class="field">
+                    <input type="password" th:field="*{usuario.clave}"/>
+                    <span th:if="${#fields.hasErrors('usuario.clave')}"
+                          th:errors="*{usuario.clave}" class="error"></span>
+                </div>
+            </div>
+
+            <div class="section">Datos personales</div>
+            <div>
+                <div class="label">Identificación</div>
+                <div class="field">
+                    <input type="text" th:field="*{identificacion}"/>
+                    <span th:if="${#fields.hasErrors('identificacion')}"
+                          th:errors="*{identificacion}" class="error"></span>
+                </div>
+            </div>
+            <div>
+                <div class="label">Nombre</div>
+                <div class="field">
+                    <input type="text" th:field="*{nombre}"/>
+                    <span th:if="${#fields.hasErrors('nombre')}"
+                          th:errors="*{nombre}" class="error"></span>
+                </div>
+            </div>
+            <div>
+                <div class="label">Primer apellido</div>
+                <div class="field">
+                    <input type="text" th:field="*{primerApellido}"/>
+                    <span th:if="${#fields.hasErrors('primerApellido')}"
+                          th:errors="*{primerApellido}" class="error"></span>
+                </div>
+            </div>
+            <div>
+                <div class="label">Nacionalidad</div>
+                <div class="field">
+                    <input type="text" th:field="*{nacionalidad}"/>
+                </div>
+            </div>
+            <div>
+                <div class="label">Teléfono</div>
+                <div class="field">
+                    <input type="text" th:field="*{telefono}"/>
+                </div>
+            </div>
+            <div>
+                <div class="label">Lugar de residencia</div>
+                <div class="field">
+                    <input type="text" th:field="*{lugarResidencia}"/>
+                </div>
+            </div>
+            <div class="section">
+                <input type="submit" value="Registrarse" class="button"/>
+            </div>
+        </form>
+    </div>
+    <a th:href="@{/login}" class="button">¿Ya tiene cuenta? Ingrese aquí</a>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Publicar puesto')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <div class="form w75">
+        <form method="POST"
+              th:action="@{${editing ? '/empresa/puestos/actualizar' : '/empresa/puestos/crear'}}"
+              th:object="${puesto}">
+
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="section">Datos del puesto</div>
+            <div>
+                <div class="label">Descripción</div>
+                <div class="field">
+                    <textarea th:field="*{descripcion}" rows="4" style="width:100%;"></textarea>
+                    <span th:if="${#fields.hasErrors('descripcion')}"
+                          th:errors="*{descripcion}" class="error"></span>
+                </div>
+            </div>
+            <div>
+                <div class="label">Salario (₡)</div>
+                <div class="field">
+                    <input type="number" step="0.01" th:field="*{salario}"/>
+                </div>
+            </div>
+            <div>
+                <div class="label">Tipo de publicación</div>
+                <div class="field">
+                    <select th:field="*{tipoPublicacion}">
+                        <option value="PUB">Público</option>
+                        <option value="PRI">Privado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">Características requeridas</div>
+            <table>
+                <thead>
+                <tr><th>Característica</th><th>Nivel requerido</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c, stat : ${caracteristicasDisponibles}">
+                    <td>
+                        <!-- Checkbox para seleccionar -->
+                        <input type="checkbox"
+                               name="caracIds"
+                               th:value="${c.id}"
+                               th:checked="${requeridas != null and requeridas.?[caracteristica.id == __${c.id}__].size() > 0}"/>
+                        <span th:text="${c.padre != null ? c.padre.nombre + ' › ' : ''} + ${c.nombre}"></span>
+                    </td>
+                    <td>
+                        <select name="niveles">
+                            <option value="1" th:selected="${true}">Básico</option>
+                            <option value="2">Intermedio</option>
+                            <option value="3">Avanzado</option>
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="section">
+                <input type="submit" value="Guardar" class="button"/>
+            </div>
+        </form>
+    </div>
+    <a th:href="@{/empresa/dashboard}" class="button">Regresar</a>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

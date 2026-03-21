@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Mi perfil')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <h2>Mi perfil</h2>
+    <div class="form w50">
+        <div class="section">Datos personales</div>
+        <div><div class="label">Nombre</div>
+            <div class="field" th:text="${oferente.nombre + ' ' + oferente.primerApellido}"></div></div>
+        <div><div class="label">Identificación</div>
+            <div class="field" th:text="${oferente.identificacion}"></div></div>
+        <div><div class="label">Nacionalidad</div>
+            <div class="field" th:text="${oferente.nacionalidad}"></div></div>
+        <div><div class="label">Teléfono</div>
+            <div class="field" th:text="${oferente.telefono}"></div></div>
+        <div><div class="label">Residencia</div>
+            <div class="field" th:text="${oferente.lugarResidencia}"></div></div>
+        <div><div class="label">Estado</div>
+            <div class="field">
+                <span th:if="${oferente.aprobado}"  style="color:green;">Aprobado</span>
+                <span th:unless="${oferente.aprobado}" style="color:orange;">Pendiente de aprobación</span>
+            </div>
+        </div>
+        <div class="section">Acciones</div>
+        <div class="field">
+            <a th:href="@{/oferente/habilidades}"  class="button">Mis habilidades</a>
+            <a th:href="@{/oferente/curriculum}"   class="button">Subir currículo</a>
+            <a th:href="@{/oferente/buscar}"        class="button">Buscar puestos</a>
+        </div>
+    </div>
+
+    <h3>Mis habilidades</h3>
+    <table th:if="${!#lists.isEmpty(habilidades)}">
+        <thead>
+        <tr><th>Categoría</th><th>Habilidad</th><th>Nivel</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="h : ${habilidades}">
+            <td th:text="${h.caracteristica.padre != null ? h.caracteristica.padre.nombre : '-'}"></td>
+            <td th:text="${h.caracteristica.nombre}"></td>
+            <td th:switch="${h.nivel}">
+                <span th:case="1">Básico</span>
+                <span th:case="2">Intermedio</span>
+                <span th:case="3">Avanzado</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(habilidades)}" class="sin-resultados">
+        No tiene habilidades registradas. <a th:href="@{/oferente/habilidades}">Agregar ahora</a>
+    </p>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

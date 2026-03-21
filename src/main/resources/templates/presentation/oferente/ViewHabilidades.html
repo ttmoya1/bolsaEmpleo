@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Mis habilidades')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <h2>Mis habilidades</h2>
+    <div class="form w75">
+        <form method="POST" action="/oferente/habilidades/guardar">
+            <div class="section">Seleccione sus habilidades y nivel</div>
+            <table>
+                <thead>
+                <tr><th>Categoría</th><th>Habilidad</th><th>Nivel</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${disponibles}">
+                    <td th:text="${c.padre != null ? c.padre.nombre : '-'}"></td>
+                    <td>
+                        <input type="checkbox"
+                               name="caracIds"
+                               th:value="${c.id}"
+                               th:checked="${habilidades.?[caracteristica.id == __${c.id}__].size() > 0}"/>
+                        <span th:text="${c.nombre}"></span>
+                    </td>
+                    <td>
+                        <select name="niveles">
+                            <option value="1"
+                                    th:selected="${habilidades.?[caracteristica.id == __${c.id}__ and nivel == 1].size() > 0}">
+                                Básico
+                            </option>
+                            <option value="2"
+                                    th:selected="${habilidades.?[caracteristica.id == __${c.id}__ and nivel == 2].size() > 0}">
+                                Intermedio
+                            </option>
+                            <option value="3"
+                                    th:selected="${habilidades.?[caracteristica.id == __${c.id}__ and nivel == 3].size() > 0}">
+                                Avanzado
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="section">
+                <input type="submit" value="Guardar habilidades" class="button"/>
+            </div>
+        </form>
+    </div>
+    <a th:href="@{/oferente/dashboard}" class="button">Regresar</a>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

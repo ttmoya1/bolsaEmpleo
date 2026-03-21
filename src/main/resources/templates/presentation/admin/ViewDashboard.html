@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Panel Admin')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <h2>Panel de administración</h2>
+    <div class="form w50">
+        <div class="section">Pendientes de aprobación</div>
+        <div>
+            <div class="label">Empresas</div>
+            <div class="field">
+                <span th:text="${totalEmpresasPendientes}"></span>
+                <a th:href="@{/admin/empresas}" class="button">Ver empresas</a>
+            </div>
+        </div>
+        <div>
+            <div class="label">Oferentes</div>
+            <div class="field">
+                <span th:text="${totalOferentesPendientes}"></span>
+                <a th:href="@{/admin/oferentes}" class="button">Ver oferentes</a>
+            </div>
+        </div>
+        <div class="section">Administración</div>
+        <div>
+            <div class="label">Características</div>
+            <div class="field">
+                <a th:href="@{/admin/caracteristicas}" class="button">Gestionar</a>
+            </div>
+        </div>
+        <div>
+            <div class="label">Reporte PDF</div>
+            <div class="field">
+                <a th:href="@{/admin/reporte}" class="button">Ver reporte</a>
+            </div>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

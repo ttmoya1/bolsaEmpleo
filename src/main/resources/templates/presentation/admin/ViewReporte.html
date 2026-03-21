@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Reporte')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <h2>Reporte de puestos por mes</h2>
+    <table th:if="${!#lists.isEmpty(datos)}">
+        <thead>
+        <tr><th>Año</th><th>Mes</th><th>Puestos registrados</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="fila : ${datos}">
+            <td th:text="${fila[0]}"></td>
+            <td th:text="${fila[1]}"></td>
+            <td th:text="${fila[2]}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(datos)}" class="sin-resultados">No hay datos registrados.</p>
+    <a th:href="@{/admin/dashboard}" class="button">Regresar</a>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

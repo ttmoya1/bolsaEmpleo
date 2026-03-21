@@ -1,0 +1,288 @@
+/* ============================================================
+   BOLSA DE EMPLEO  –  style.css
+   Basado en el estilo del proyecto PrestamoForm
+   ============================================================ */
+
+/* Layout general */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    padding-bottom: 60px; /* espacio para el footer fijo */
+}
+
+header {
+    background-color: #2c5f8a;
+    color: white;
+    font-weight: bold;
+    font-size: x-large;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #2c5f8a;
+    color: white;
+    font-weight: bold;
+    padding: 6px 20px;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+main h2, main h3 {
+    width: 75%;
+    text-align: left;
+}
+
+/* Navegación */
+nav {
+    background-color: #1a3d5c;
+    padding: 8px 16px;
+}
+
+ul.Menu {
+    margin: 0; padding: 0;
+    list-style: none;
+    font-size: 0;
+}
+
+ul.Menu li {
+    font-size: 15px;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+}
+
+ul.Menu li > a {
+    color: #a8d4f5;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 6px 14px;
+    display: inline-block;
+}
+
+ul.Menu li > a:hover { color: #ffffff; }
+
+ul.Menu li ul {
+    display: none;
+    position: absolute;
+    background-color: #1a3d5c;
+    min-width: 160px;
+    z-index: 100;
+    padding: 0;
+    list-style: none;
+}
+
+ul.Menu li:hover ul { display: block; }
+
+ul.Menu li ul li a {
+    color: #a8d4f5;
+    padding: 6px 16px;
+    display: block;
+    font-size: 14px;
+}
+
+ul.Menu li ul li a:hover { color: #fff; background-color: #2c5f8a; }
+
+/* Anchos de contenido */
+.w25  { width: 25%; }
+.w50  { width: 50%; }
+.w75  { width: 75%; }
+.w100 { width: 100%; }
+
+/* Formularios */
+div.form {
+    background-color: #f2f2f2;
+    padding: 1em;
+    border-radius: 10px;
+    margin-bottom: 1em;
+}
+
+div.form div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+div.section {
+    background-color: #2c5f8a;
+    color: white;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin: 8px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+div.label {
+    padding: 5px;
+    width: 30%;
+    text-align: right;
+    font-weight: bold;
+    padding-right: 10px;
+}
+
+div.field { padding: 5px; flex: 1; }
+
+input[type=text], input[type=email],
+input[type=password], input[type=number],
+textarea, select {
+    padding: 4px 8px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+input:hover, select:hover, textarea:hover {
+    background-color: #ddeeff;
+}
+
+/* Botones */
+.button, input[type=submit] {
+    display: inline-block;
+    padding: 5px 14px;
+    margin: 3px;
+    color: white;
+    background-color: #2c5f8a;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.button:hover, input[type=submit]:hover {
+    background-color: #1a3d5c;
+}
+
+a.delete, .button.delete {
+    background-color: #c0392b;
+}
+
+a.delete:hover, .button.delete:hover {
+    background-color: #922b21;
+}
+
+/* Tablas */
+table {
+    width: 75%;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+
+table th, table td {
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+table th {
+    background-color: #2c5f8a;
+    color: white;
+}
+
+table tr:nth-child(even) { background-color: #f0f4f8; }
+table tr:hover           { background-color: #ddeeff; }
+
+table td a {
+    display: inline-block;
+    padding: 3px 10px;
+    margin: 2px;
+    color: white;
+    background-color: #2c5f8a;
+    border-radius: 4px;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+table td a:hover            { background-color: #1a3d5c; }
+table td a.delete           { background-color: #c0392b; }
+table td a.delete:hover     { background-color: #922b21; }
+
+/* Mensajes */
+.error p, span.error { color: #c0392b; font-size: 13px; margin: 4px 0; }
+.success p           { color: #1e8449; font-size: 13px; margin: 4px 0; }
+.sin-resultados      { color: #777; font-style: italic; margin: 10px 0; }
+
+/* Puestos recientes (portada) */
+.puestos-recientes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 75%;
+    margin: 16px 0;
+}
+
+.puesto-card {
+    position: relative;
+    background: #e8f0f7;
+    border: 1px solid #2c5f8a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    width: calc(33% - 20px);
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.puesto-card:hover .puesto-detalle {
+    display: block;
+}
+
+.puesto-detalle {
+    display: none;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #2c5f8a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+}
+
+.puesto-salario {
+    display: block;
+    color: #1a3d5c;
+    font-weight: bold;
+    margin-top: 6px;
+}
+
+.acciones-portada {
+    margin: 20px 0;
+    display: flex;
+    gap: 12px;
+}
+
+/* Árbol de características (admin) */
+.caract-raiz {
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #e8f0f7;
+    border-radius: 6px;
+}
+
+.caract-raiz ul {
+    margin: 6px 0 0 20px;
+    padding: 0;
+    list-style: disc;
+}
+
+.caract-raiz ul li {
+    margin: 4px 0;
+    font-size: 14px;
+}

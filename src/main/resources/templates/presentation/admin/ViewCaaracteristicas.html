@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Características')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <h2>Características del sistema</h2>
+
+    <!-- Árbol de características -->
+    <div class="w75">
+        <div th:each="raiz : ${raices}" class="caract-raiz">
+            <strong th:text="${raiz.nombre}"></strong>
+            <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${raiz.id})}"
+               class="delete" style="margin-left:1em;">Eliminar</a>
+            <ul>
+                <li th:each="hijo : ${raiz.hijos}">
+                    <span th:text="${hijo.nombre}"></span>
+                    <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${hijo.id})}"
+                       class="delete" style="margin-left:0.5em;">Eliminar</a>
+                </li>
+            </ul>
+        </div>
+        <p th:if="${#lists.isEmpty(raices)}" class="sin-resultados">
+            No hay características registradas.
+        </p>
+    </div>
+
+    <!-- Formulario agregar característica -->
+    <div class="form w50">
+        <form method="POST" action="/admin/caracteristicas/guardar"
+              th:object="${caracteristica}">
+            <div class="section">Agregar característica</div>
+            <div>
+                <div class="label">Nombre</div>
+                <div class="field">
+                    <input type="text" th:field="*{nombre}" required/>
+                    <span th:if="${#fields.hasErrors('nombre')}"
+                          th:errors="*{nombre}" class="error"></span>
+                </div>
+            </div>
+            <div>
+                <div class="label">Categoría padre</div>
+                <div class="field">
+                    <select th:field="*{padre.id}">
+                        <option value="0">-- Ninguno (categoría raíz) --</option>
+                        <option th:each="p : ${padres}"
+                                th:value="${p.id}"
+                                th:text="${p.nombre}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="section">
+                <input type="submit" value="Guardar" class="button"/>
+            </div>
+        </form>
+    </div>
+
+    <a th:href="@{/admin/dashboard}" class="button">Regresar</a>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

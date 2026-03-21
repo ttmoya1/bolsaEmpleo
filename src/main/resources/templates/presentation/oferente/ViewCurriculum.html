@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Mi currículo')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <h2>Mi currículo</h2>
+    <div class="form w50">
+
+        <!-- Currículo actual -->
+        <div th:if="${oferente.curriculumPdf != null}">
+            <div class="section">Currículo actual</div>
+            <div>
+                <div class="label">Archivo</div>
+                <div class="field">
+                    <a th:href="${oferente.curriculumPdf}" target="_blank" class="button">Ver PDF</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario subir nuevo -->
+        <form method="POST" action="/oferente/curriculum/subir"
+              enctype="multipart/form-data">
+            <div class="section">
+                <span th:text="${oferente.curriculumPdf != null ? 'Reemplazar currículo' : 'Subir currículo'}"></span>
+            </div>
+            <div>
+                <div class="label">Archivo PDF</div>
+                <div class="field">
+                    <input type="file" name="archivo" accept=".pdf" required/>
+                </div>
+            </div>
+            <div th:if="${error}" class="error">
+                <p th:text="${error}"></p>
+            </div>
+            <div class="section">
+                <input type="submit" value="Subir" class="button"/>
+            </div>
+        </form>
+    </div>
+    <a th:href="@{/oferente/dashboard}" class="button">Regresar</a>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

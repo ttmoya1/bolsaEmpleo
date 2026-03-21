@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Login')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <div class="form w25">
+        <form action="/login" method="post">
+            <div class="section">&#128697; Iniciar sesión</div>
+            <div>
+                <div class="label">Correo</div>
+                <div class="field">
+                    <input type="email" name="username" required/>
+                </div>
+            </div>
+            <div>
+                <div class="label">Clave</div>
+                <div class="field">
+                    <input type="password" name="password" required/>
+                </div>
+            </div>
+            <div class="section">
+                <input type="submit" value="Ingresar" class="button"/>
+            </div>
+        </form>
+        <div th:if="${param.error}" class="error">
+            <p>Correo o clave incorrectos.</p>
+        </div>
+        <div th:if="${param.logout}" class="success">
+            <p>Sesión cerrada correctamente.</p>
+        </div>
+    </div>
+    <p>¿No tiene cuenta?
+        <a th:href="@{/registro/empresa}">Registrar empresa</a> |
+        <a th:href="@{/registro/oferente}">Registrar como oferente</a>
+    </p>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

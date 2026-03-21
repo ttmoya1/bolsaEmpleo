@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Empresas')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+    <h2>Empresas pendientes de aprobación</h2>
+    <table th:if="${!#lists.isEmpty(pendientes)}">
+        <thead>
+        <tr>
+            <th>Nombre</th><th>Localización</th><th>Correo</th><th>Teléfono</th><th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="e : ${pendientes}">
+            <td th:text="${e.nombre}"></td>
+            <td th:text="${e.localizacion}"></td>
+            <td th:text="${e.usuario.correo}"></td>
+            <td th:text="${e.telefono}"></td>
+            <td>
+                <a th:href="@{/admin/empresas/aprobar/{id}(id=${e.id})}" class="button">Aprobar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(pendientes)}" class="sin-resultados">No hay empresas pendientes.</p>
+
+    <h2>Empresas aprobadas</h2>
+    <table th:if="${!#lists.isEmpty(aprobadas)}">
+        <thead>
+        <tr>
+            <th>Nombre</th><th>Localización</th><th>Correo</th><th>Teléfono</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="e : ${aprobadas}">
+            <td th:text="${e.nombre}"></td>
+            <td th:text="${e.localizacion}"></td>
+            <td th:text="${e.usuario.correo}"></td>
+            <td th:text="${e.telefono}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(aprobadas)}" class="sin-resultados">No hay empresas aprobadas aún.</p>
+
+    <a th:href="@{/admin/dashboard}" class="button">Regresar</a>
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>
