@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- ============================================================ -->
+<!-- HEAD                                                          -->
+<!-- ============================================================ -->
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${titulo} + ' | Bolsa de Empleo'">Bolsa de Empleo</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="icon"       th:href="@{/images/favicon.ico}"/>
+</head>
+
+<!-- ============================================================ -->
+<!-- HEADER                                                        -->
+<!-- ============================================================ -->
+<header th:fragment="header">
+    <div>Bolsa de Empleo</div>
+</header>
+
+<!-- ============================================================ -->
+<!-- NAV                                                           -->
+<!-- ============================================================ -->
+<nav th:fragment="nav">
+    <ul class="Menu">
+
+        <!-- Siempre visible -->
+        <li><a th:href="@{/publica/inicio}">Inicio</a></li>
+        <li><a th:href="@{/publica/buscar}">Buscar puestos</a></li>
+
+        <!-- Solo anónimos -->
+        <th:block sec:authorize="isAnonymous()">
+            <li><a th:href="@{/registro/empresa}">Registrar empresa</a></li>
+            <li><a th:href="@{/registro/oferente}">Registrar oferente</a></li>
+            <li><a th:href="@{/login}">Login</a></li>
+        </th:block>
+
+        <!-- Admin -->
+        <th:block sec:authorize="hasAuthority('ADM')">
+            <li><a th:href="@{/admin/dashboard}">Panel admin</a></li>
+        </th:block>
+
+        <!-- Empresa -->
+        <th:block sec:authorize="hasAuthority('EMP')">
+            <li><a th:href="@{/empresa/dashboard}">Mi empresa</a></li>
+        </th:block>
+
+        <!-- Oferente -->
+        <th:block sec:authorize="hasAuthority('OFE')">
+            <li><a th:href="@{/oferente/dashboard}">Mi perfil</a></li>
+        </th:block>
+
+        <!-- Menú usuario autenticado -->
+        <th:block sec:authorize="isAuthenticated()">
+            <li>
+                <a href="#">&#128697; <span sec:authentication="name"></span></a>
+                <ul>
+                    <li><a th:href="@{/logout}">Cerrar sesión</a></li>
+                </ul>
+            </li>
+        </th:block>
+
+    </ul>
+</nav>
+
+<!-- ============================================================ -->
+<!-- FOOTER                                                        -->
+<!-- ============================================================ -->
+<footer th:fragment="footer">
+    <div>Bolsa de Empleo &copy; 2026</div>
+</footer>
+
+</html>

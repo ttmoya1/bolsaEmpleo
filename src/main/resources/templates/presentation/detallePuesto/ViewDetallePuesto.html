@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Detalle de puesto')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+
+    <div class="form w75">
+        <div class="section">Detalle del puesto</div>
+
+        <div>
+            <div class="label">Empresa</div>
+            <div class="field" th:text="${puesto.empresa.nombre}"></div>
+        </div>
+        <div>
+            <div class="label">Descripción</div>
+            <div class="field" th:text="${puesto.descripcion}"></div>
+        </div>
+        <div>
+            <div class="label">Salario</div>
+            <div class="field"
+                 th:text="${puesto.salario != null
+                            ? '₡ ' + #numbers.formatDecimal(puesto.salario,1,'COMMA',0,'POINT')
+                            : 'No indicado'}">
+            </div>
+        </div>
+        <div>
+            <div class="label">Publicado</div>
+            <div class="field"
+                 th:text="${#temporals.format(puesto.fechaRegistro,'dd/MM/yyyy')}">
+            </div>
+        </div>
+
+        <div class="section">Características requeridas</div>
+
+        <table th:if="${!#lists.isEmpty(caracteristicas)}">
+            <thead>
+            <tr>
+                <th>Característica</th>
+                <th>Nivel requerido</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="pc : ${caracteristicas}">
+                <td th:text="${pc.caracteristica.nombre}"></td>
+                <td th:switch="${pc.nivelDeseado}">
+                    <span th:case="1">Básico</span>
+                    <span th:case="2">Intermedio</span>
+                    <span th:case="3">Avanzado</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${#lists.isEmpty(caracteristicas)}" class="sin-resultados">
+            No se especificaron características para este puesto.
+        </p>
+    </div>
+
+    <a href="/publica/buscar" class="button">Regresar</a>
+
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

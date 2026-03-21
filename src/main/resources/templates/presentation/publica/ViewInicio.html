@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Inicio')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+
+    <h2>Puestos disponibles recientemente</h2>
+
+    <div class="puestos-recientes">
+        <div th:each="p : ${puestosRecientes}" class="puesto-card">
+
+            <!-- Al pasar el mouse sobre el título se muestra el detalle -->
+            <div class="puesto-header">
+                <strong th:text="${p.descripcion.length() > 60
+                                   ? p.descripcion.substring(0, 60) + '...'
+                                   : p.descripcion}">
+                </strong>
+                <span class="puesto-salario"
+                      th:text="${p.salario != null ? '₡ ' + #numbers.formatDecimal(p.salario,1,'COMMA',0,'POINT') : 'No indicado'}">
+                </span>
+            </div>
+
+            <!-- Tooltip con características requeridas -->
+            <div class="puesto-detalle">
+                <p><strong>Empresa:</strong>
+                    <span th:text="${p.empresa.nombre}"></span>
+                </p>
+                <p><strong>Características requeridas:</strong></p>
+                <ul>
+                    <li th:each="pc : ${p.caracteristicas}"
+                        th:text="${pc.caracteristica.nombre + ' — Nivel ' + pc.nivelDeseado}">
+                    </li>
+                </ul>
+                <a th:href="@{/publica/puesto/{id}(id=${p.id})}" class="button">Ver detalle</a>
+            </div>
+
+        </div>
+
+        <p th:if="${#lists.isEmpty(puestosRecientes)}" class="sin-resultados">
+            No hay puestos publicados aún.
+        </p>
+    </div>
+
+    <div class="acciones-portada">
+        <a href="/publica/buscar" class="button">Buscar puestos</a>
+        <a href="/registro/empresa" class="button">Registrar empresa</a>
+        <a href="/registro/oferente" class="button">Registrar como oferente</a>
+    </div>
+
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

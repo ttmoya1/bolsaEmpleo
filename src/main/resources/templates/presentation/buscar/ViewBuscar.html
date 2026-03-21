@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Buscar puestos')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+
+    <h2>Buscar puestos</h2>
+
+    <!-- Formulario de búsqueda -->
+    <div class="form w50">
+        <form method="POST" action="/publica/buscar">
+            <div class="section">Criterios de búsqueda</div>
+            <div>
+                <div class="label">Descripción</div>
+                <div class="field">
+                    <input type="text"
+                           name="textoBusqueda"
+                           th:value="${textoBusqueda}"
+                           placeholder="Ej: desarrollador Java, diseñador web..."/>
+                    <input type="submit" value="Buscar" class="button"/>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Resultados -->
+    <div class="w75" th:if="${resultados != null}">
+        <h3 th:text="'Resultados: ' + ${#lists.size(resultados)} + ' puesto(s) encontrado(s)'"></h3>
+
+        <table th:if="${!#lists.isEmpty(resultados)}">
+            <thead>
+            <tr>
+                <th>Empresa</th>
+                <th>Descripción</th>
+                <th>Salario</th>
+                <th>Fecha</th>
+                <th>Detalle</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${resultados}">
+                <td th:text="${p.empresa.nombre}"></td>
+                <td th:text="${p.descripcion.length() > 80
+                                   ? p.descripcion.substring(0, 80) + '...'
+                                   : p.descripcion}">
+                </td>
+                <td th:text="${p.salario != null
+                                   ? '₡ ' + #numbers.formatDecimal(p.salario,1,'COMMA',0,'POINT')
+                                   : 'No indicado'}">
+                </td>
+                <td th:text="${#temporals.format(p.fechaRegistro,'dd/MM/yyyy')}"></td>
+                <td>
+                    <a th:href="@{/publica/puesto/{id}(id=${p.id})}" class="button">Ver</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${#lists.isEmpty(resultados)}" class="sin-resultados">
+            No se encontraron puestos con ese criterio.
+        </p>
+    </div>
+
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>
