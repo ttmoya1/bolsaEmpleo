@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -27,6 +27,20 @@ public class ControllerOferente {
     private Oferente getOferente(UserDetails ud) {
         Usuario usuario = service.usuarioByCorreo(ud.getUsername());
         return service.oferenteByUsuario(usuario);
+    }
+
+    @GetMapping("/aplicar/{puestoId}")
+    public String aplicar(@AuthenticationPrincipal UserDetails ud,
+                          @PathVariable Long puestoId,
+                          RedirectAttributes redirectAttrs) {
+        Oferente oferente = getOferente(ud);
+        try {
+            service.aplicarAPuesto(puestoId, oferente.getId());
+            redirectAttrs.addFlashAttribute("mensaje", "¡Aplicación enviada con éxito!");
+        } catch (IllegalArgumentException e) {
+            redirectAttrs.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/oferente/buscar";
     }
 
     // ----------------------------------------------------------------

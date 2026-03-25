@@ -61,19 +61,36 @@ public class ControllerRegistro {
 
     @PostMapping("/oferente")
     public String registroOferentePost(
-            @ModelAttribute("usuario") @Valid Usuario usuario, BindingResult resUsuario,
-            @ModelAttribute("oferente") @Valid Oferente oferente, BindingResult resOferente,
+            @RequestParam String correo,
+            @RequestParam String clave,
+            @RequestParam String identificacion,
+            @RequestParam String nombre,
+            @RequestParam String primerApellido,
+            @RequestParam(required = false) String nacionalidad,
+            @RequestParam(required = false) String telefono,
+            @RequestParam(required = false) String lugarResidencia,
             Model model) {
 
-        if (resUsuario.hasErrors() || resOferente.hasErrors()) {
-            return "presentation/registro/ViewRegistroOferente";
-        }
+        Usuario usuario = new Usuario();
+        usuario.setCorreo(correo);
+        usuario.setClave(clave);
+
+        Oferente oferente = new Oferente();
+        oferente.setIdentificacion(identificacion);
+        oferente.setNombre(nombre);
+        oferente.setPrimerApellido(primerApellido);
+        oferente.setNacionalidad(nacionalidad);
+        oferente.setTelefono(telefono);
+        oferente.setLugarResidencia(lugarResidencia);
+
         try {
             service.registrarOferente(usuario, oferente);
             model.addAttribute("mensaje", "Registro exitoso. Un administrador aprobará su cuenta pronto.");
             return "presentation/registro/ViewRegistroExito";
         } catch (IllegalArgumentException e) {
-            resUsuario.addError(new FieldError("usuario", "correo", e.getMessage()));
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("oferente", oferente);
             return "presentation/registro/ViewRegistroOferente";
         }
     }

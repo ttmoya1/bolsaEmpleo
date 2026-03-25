@@ -6,23 +6,18 @@
 <nav    th:replace="~{presentation/fragments :: nav}"></nav>
 <main>
     <div class="form w50">
-        <form method="POST" action="/registro/empresa"
-              th:object="${empresa}">
+        <form method="POST" action="/registro/empresa">
             <div class="section">Datos de acceso</div>
             <div>
                 <div class="label">Correo</div>
                 <div class="field">
-                    <input type="email" th:field="*{usuario.correo}"/>
-                    <span th:if="${#fields.hasErrors('usuario.correo')}"
-                          th:errors="*{usuario.correo}" class="error"></span>
+                    <input type="email" name="correo" th:value="${usuario.correo}"/>
                 </div>
             </div>
             <div>
                 <div class="label">Clave</div>
                 <div class="field">
-                    <input type="password" th:field="*{usuario.clave}"/>
-                    <span th:if="${#fields.hasErrors('usuario.clave')}"
-                          th:errors="*{usuario.clave}" class="error"></span>
+                    <input type="password" name="clave"/>
                 </div>
             </div>
 
@@ -30,27 +25,25 @@
             <div>
                 <div class="label">Nombre</div>
                 <div class="field">
-                    <input type="text" th:field="*{nombre}"/>
-                    <span th:if="${#fields.hasErrors('nombre')}"
-                          th:errors="*{nombre}" class="error"></span>
+                    <input type="text" name="nombre" th:value="${empresa.nombre}"/>
                 </div>
             </div>
             <div>
                 <div class="label">Localización</div>
                 <div class="field">
-                    <input type="text" th:field="*{localizacion}"/>
+                    <input type="text" name="localizacion" th:value="${empresa.localizacion}"/>
                 </div>
             </div>
             <div>
                 <div class="label">Teléfono</div>
                 <div class="field">
-                    <input type="text" th:field="*{telefono}"/>
+                    <input type="text" name="telefono" th:value="${empresa.telefono}"/>
                 </div>
             </div>
             <div>
                 <div class="label">Descripción</div>
                 <div class="field">
-                    <textarea th:field="*{descripcion}" rows="3"></textarea>
+                    <textarea name="descripcion" rows="3" th:text="${empresa.descripcion}"></textarea>
                 </div>
             </div>
             <div class="section">

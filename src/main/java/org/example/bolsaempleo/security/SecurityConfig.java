@@ -58,21 +58,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
-                        // Rutas públicas — accesibles sin login
-                        .requestMatchers(
-                                "/",
-                                "/login",
-                                "/acceso-denegado",
-                                "/dashboard",
-                                "/publica/**",
-                                "/registro/**",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**",
-                                "/webjars/**"
-                        ).permitAll()
-                        // Paneles por rol
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/", "/login", "/acceso-denegado", "/dashboard", "/publica/**", "/registro/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADM")
                         .requestMatchers("/empresa/**").hasAuthority("EMP")
                         .requestMatchers("/oferente/**").hasAuthority("OFE")

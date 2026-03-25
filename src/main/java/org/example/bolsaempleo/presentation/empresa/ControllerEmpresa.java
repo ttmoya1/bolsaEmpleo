@@ -20,7 +20,6 @@ public class ControllerEmpresa {
     @Autowired
     private Service service;
 
-    // Obtiene la entidad Empresa del usuario autenticado
     private Empresa getEmpresa(UserDetails ud) {
         Usuario usuario = service.usuarioByCorreo(ud.getUsername());
         return service.empresaByUsuario(usuario);
@@ -75,7 +74,6 @@ public class ControllerEmpresa {
         Empresa empresa = getEmpresa(ud);
         puesto.setEmpresa(empresa);
         service.guardarPuesto(puesto);
-
         guardarCaracteristicasPuesto(puesto, caracIds, niveles);
         return "redirect:/empresa/puestos";
     }
@@ -105,11 +103,9 @@ public class ControllerEmpresa {
             return "presentation/empresa/ViewEditPuesto";
         }
 
-        // Recuperar empresa del puesto original para no perderla
         Puesto original = service.puestoById(puesto.getId());
         puesto.setEmpresa(original.getEmpresa());
         service.guardarPuesto(puesto);
-
         guardarCaracteristicasPuesto(puesto, caracIds, niveles);
         return "redirect:/empresa/puestos";
     }
@@ -135,7 +131,18 @@ public class ControllerEmpresa {
         model.addAttribute("resultados",       resultados);
         model.addAttribute("minCoincidencias", minCoincidencias);
         model.addAttribute("totalRequisitos",  service.caracteristicasByPuesto(id).size());
+        model.addAttribute("aplicaciones",     service.aplicacionesByPuesto(id));
         return "presentation/empresa/ViewCandidatos";
+    }
+
+    // ----------------------------------------------------------------
+    // APLICACIONES  –  cambiar estado
+    // ----------------------------------------------------------------
+    @GetMapping("/aplicaciones/estado/{id}/{estado}")
+    public String cambiarEstado(@PathVariable Long id, @PathVariable String estado) {
+        Aplicacion apl = service.aplicacionById(id);
+        service.cambiarEstadoAplicacion(id, estado);
+        return "redirect:/empresa/puestos/" + apl.getPuesto().getId() + "/candidatos";
     }
 
     // ----------------------------------------------------------------
@@ -150,7 +157,7 @@ public class ControllerEmpresa {
     }
 
     // ----------------------------------------------------------------
-    // Auxiliar: construye y guarda la lista de PuestoCaracteristica
+    // Auxiliar
     // ----------------------------------------------------------------
     private void guardarCaracteristicasPuesto(Puesto puesto,
                                               List<Long> caracIds,

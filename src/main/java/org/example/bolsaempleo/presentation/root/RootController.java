@@ -16,6 +16,8 @@ public class RootController {
         return "redirect:/publica/inicio";
     }
 
+
+
     // ----------------------------------------------------------------
     // /dashboard  → redirige al panel correcto según el rol del usuario
     // Spring Security redirige aquí después del login exitoso

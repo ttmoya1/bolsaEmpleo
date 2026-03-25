@@ -48,6 +48,36 @@
         No se encontraron candidatos con ese nivel de coincidencia.
     </p>
 
+    <h3>Aplicaciones recibidas</h3>
+    <table th:if="${!#lists.isEmpty(aplicaciones)}">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Identificación</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${aplicaciones}">
+            <td th:text="${a.oferente.nombre + ' ' + a.oferente.primerApellido}"></td>
+            <td th:text="${a.oferente.identificacion}"></td>
+            <td th:text="${#temporals.format(a.fecha,'dd/MM/yyyy')}"></td>
+            <td th:text="${a.estado == 'PEN' ? 'Pendiente' : a.estado == 'ACE' ? 'Aceptado' : 'Rechazado'}"></td>
+            <td>
+                <a th:href="@{/empresa/aplicaciones/estado/{id}/ACE(id=${a.id})}" class="button">Aceptar</a>
+                <a th:href="@{/empresa/aplicaciones/estado/{id}/REC(id=${a.id})}" class="button">Rechazar</a>
+                <a th:href="@{/empresa/candidato/{id}(id=${a.oferente.id})}" class="button">Ver perfil</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(aplicaciones)}" class="sin-resultados">
+        No hay aplicaciones para este puesto.
+    </p>
+
+
     <a th:href="@{/empresa/dashboard}" class="button">Regresar</a>
 </main>
 <footer th:replace="~{presentation/fragments :: footer}"></footer>

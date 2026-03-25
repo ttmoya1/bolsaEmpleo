@@ -6,6 +6,15 @@
 <nav    th:replace="~{presentation/fragments :: nav}"></nav>
 <main>
 
+
+    <div th:if="${mensaje}" class="success">
+        <p th:text="${mensaje}"></p>
+    </div>
+    <div th:if="${error}" class="error">
+        <p th:text="${error}"></p>
+    </div>
+
+
     <div class="form w75">
         <div class="section">Detalle del puesto</div>
 
@@ -52,6 +61,16 @@
             </tr>
             </tbody>
         </table>
+
+        <!-- Botón aplicar (solo para oferentes autenticados) -->
+        <div th:if="${#authorization.expression('hasAuthority(''OFE'')')}">
+            <span th:if="${yaAplico}" class="success">Ya aplicó a este puesto.</span>
+            <a th:if="${!yaAplico}"
+               th:href="@{/oferente/aplicar/{id}(id=${puesto.id})}"
+               class="button">Aplicar a este puesto</a>
+        </div>
+
+        <a href="/publica/buscar" class="button">Regresar</a>
 
         <p th:if="${#lists.isEmpty(caracteristicas)}" class="sin-resultados">
             No se especificaron características para este puesto.

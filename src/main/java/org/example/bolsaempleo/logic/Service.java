@@ -28,10 +28,34 @@ public class Service {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + correo));
     }
 
+    @Autowired private AplicacionRepository aplicaciones;
+
+    public void aplicarAPuesto(Long puestoId, Long oferenteId) {
+        if (aplicaciones.existsByPuestoIdAndOferenteId(puestoId, oferenteId))
+            throw new IllegalArgumentException("Ya aplicó a este puesto.");
+        Aplicacion a = new Aplicacion();
+        a.setPuesto(puestoById(puestoId));
+        a.setOferente(oferenteById(oferenteId));
+        aplicaciones.save(a);
+    }
+
+    public List<Aplicacion> aplicacionesByPuesto(Long puestoId) {
+        return aplicaciones.findByPuestoId(puestoId);
+    }
+
+    public List<Aplicacion> aplicacionesByOferente(Long oferenteId) {
+        return aplicaciones.findByOferenteId(oferenteId);
+    }
+
+    public void cambiarEstadoAplicacion(Long aplicacionId, String estado) {
+        Aplicacion a = aplicaciones.findById(aplicacionId)
+                .orElseThrow(() -> new IllegalArgumentException("Aplicación no encontrada."));
+        a.setEstado(estado);
+        aplicaciones.save(a);
+    }
     // ================================================================
     // REGISTRO  (parte pública)
     // ================================================================
-
     public void registrarEmpresa(Usuario usuario, Empresa empresa) {
         if (usuarios.existsByCorreo(usuario.getCorreo()))
             throw new IllegalArgumentException("El correo ya está registrado.");
@@ -246,6 +270,14 @@ public class Service {
         oferentes.save(oferente);
     }
 
+    public boolean yaAplico(Long puestoId, Long oferenteId) {
+        return aplicaciones.existsByPuestoIdAndOferenteId(puestoId, oferenteId);
+    }
+    public Aplicacion aplicacionById(Long id) {
+        return aplicaciones.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Aplicación no encontrada."));
+    }
+
     // ================================================================
     // REPORTE  –  puestos por mes (para PDF del admin)
     // ================================================================
@@ -255,3 +287,6 @@ public class Service {
         return puestos.contarPuestosPorMes();
     }
 }
+
+
+

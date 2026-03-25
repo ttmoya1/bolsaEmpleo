@@ -5,9 +5,12 @@ import org.example.bolsaempleo.logic.Puesto;
 import org.example.bolsaempleo.logic.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.example.bolsaempleo.logic.Usuario;
+import org.example.bolsaempleo.logic.Oferente;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 
 @Controller
@@ -63,15 +66,26 @@ public class ControllerPublica {
     // GET /publica/puesto/{id}
     // ----------------------------------------------------------------
     @GetMapping("/puesto/{id}")
-    public String verPuesto(@PathVariable Long id, Model model) {
+    public String verPuesto(@PathVariable Long id, Model model,
+                            @AuthenticationPrincipal UserDetails ud) {
         try {
             Puesto puesto = service.puestoById(id);
-            // Solo se puede ver si es público y está activo
             if (!puesto.isActivo() || !"PUB".equals(puesto.getTipoPublicacion())) {
                 return "redirect:/publica/inicio";
             }
             model.addAttribute("puesto", puesto);
             model.addAttribute("caracteristicas", service.caracteristicasByPuesto(id));
+
+            // Verificar si el oferente ya aplicó
+            if (ud != null) {
+                try {
+                    Usuario usuario = service.usuarioByCorreo(ud.getUsername());
+                    Oferente oferente = service.oferenteByUsuario(usuario);
+                    boolean yaAplico = service.yaAplico(puesto.getId(), oferente.getId());
+                    model.addAttribute("yaAplico", yaAplico);
+                } catch (Exception ignored) {}
+            }
+
             return "presentation/publica/ViewDetallePuesto";
         } catch (Exception e) {
             return "redirect:/publica/inicio";

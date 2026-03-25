@@ -127,4 +127,16 @@ INSERT INTO caracteristica (padre_id, nombre) VALUES
                                                   (3, 'MongoDB'),
                                                   (4, 'Inglés'),
                                                   (4, 'Francés');
+
+
+CREATE TABLE aplicacion (
+                            id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            puesto_id   BIGINT      NOT NULL,
+                            oferente_id BIGINT      NOT NULL,
+                            fecha       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                            estado      VARCHAR(10) NOT NULL DEFAULT 'PEN',
+                            CONSTRAINT fk_apl_puesto   FOREIGN KEY (puesto_id)   REFERENCES puesto(id),
+                            CONSTRAINT fk_apl_oferente FOREIGN KEY (oferente_id) REFERENCES oferente(id),
+                            CONSTRAINT uq_aplicacion   UNIQUE (puesto_id, oferente_id)
+);
  
