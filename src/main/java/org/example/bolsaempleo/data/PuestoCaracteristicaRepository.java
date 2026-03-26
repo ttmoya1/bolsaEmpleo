@@ -1,6 +1,7 @@
 package org.example.bolsaempleo.data;
 
 
+
 import org.example.bolsaempleo.logic.PuestoCaracteristica;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,5 +17,7 @@ public interface PuestoCaracteristicaRepository extends JpaRepository<PuestoCara
     Optional<PuestoCaracteristica> findByPuestoIdAndCaracteristicaId(Long puestoId, Long caracteristicaId);
 
     /** Elimina todos los requisitos de un puesto (útil al actualizar la lista completa) */
+
+
     void deleteByPuestoId(Long puestoId);
 }

@@ -3,7 +3,10 @@ package org.example.bolsaempleo.data;
 import org.example.bolsaempleo.logic.Oferente;
 import org.example.bolsaempleo.logic.OferenteHabilidad;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +20,9 @@ public interface OferenteHabilidadRepository extends JpaRepository<OferenteHabil
     Optional<OferenteHabilidad> findByOferenteIdAndCaracteristicaId(Long oferenteId, Long caracteristicaId);
 
     /** Elimina todas las habilidades de un oferente (útil al reemplazar la lista completa) */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM OferenteHabilidad oh WHERE oh.oferente.id = :oferenteId")
     void deleteByOferenteId(Long oferenteId);
 
     /**

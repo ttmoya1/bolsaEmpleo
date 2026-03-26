@@ -4,6 +4,8 @@ import org.example.bolsaempleo.logic.*;
 import org.example.bolsaempleo.data.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 
@@ -119,12 +121,18 @@ public class Service {
      * Reemplaza la lista completa de habilidades del oferente.
      * Se borran las anteriores y se guardan las nuevas.
      */
+
+    @Transactional
     public void guardarHabilidades(Oferente oferente, List<OferenteHabilidad> lista) {
         habilidades.deleteByOferenteId(oferente.getId());
+
         for (OferenteHabilidad h : lista) {
             h.setOferente(oferente);
         }
-        habilidades.saveAll(lista);
+
+        if (!lista.isEmpty()) {
+            habilidades.saveAll(lista);
+        }
     }
 
     // ================================================================
@@ -167,7 +175,7 @@ public class Service {
 
     /** Búsqueda pública (solo PUB) */
     public List<Puesto> buscarPuestosPublicos(String texto) {
-        return puestos.buscarPublicosPorDescripcion(texto == null ? "" : texto);
+        return puestos.buscarPublicosPorDescripcion(texto == null ? "" : texto.trim());
     }
 
     /** Búsqueda para oferentes aprobados (PUB + PRI) */
@@ -212,6 +220,7 @@ public class Service {
     /**
      * Reemplaza la lista completa de características requeridas por el puesto.
      */
+
     public void guardarCaracteristicasPuesto(Puesto puesto, List<PuestoCaracteristica> lista) {
         puestosCaracteristicas.deleteByPuestoId(puesto.getId());
         for (PuestoCaracteristica pc : lista) {

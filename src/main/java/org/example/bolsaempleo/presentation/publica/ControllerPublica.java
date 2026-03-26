@@ -47,16 +47,18 @@ public class ControllerPublica {
     // ----------------------------------------------------------------
     @GetMapping("/buscar")
     public String buscarGet(Model model,
-                            @ModelAttribute("textoBusqueda") String textoBusqueda) {
+                            @RequestParam(value = "textoBusqueda", required = false) String textoBusqueda) {
         List<Puesto> resultados = service.buscarPuestosPublicos(textoBusqueda);
+        model.addAttribute("textoBusqueda", textoBusqueda);
         model.addAttribute("resultados", resultados);
         return "presentation/publica/ViewBuscar";
     }
 
     @PostMapping("/buscar")
     public String buscarPost(Model model,
-                             @ModelAttribute("textoBusqueda") String textoBusqueda) {
+                             @RequestParam(value = "textoBusqueda", required = false) String textoBusqueda) {
         List<Puesto> resultados = service.buscarPuestosPublicos(textoBusqueda);
+        model.addAttribute("textoBusqueda", textoBusqueda);
         model.addAttribute("resultados", resultados);
         return "presentation/publica/ViewBuscar";
     }
