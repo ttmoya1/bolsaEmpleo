@@ -1,6 +1,5 @@
 package org.example.bolsaempleo.presentation.admin;
 
-
 import jakarta.validation.Valid;
 import org.example.bolsaempleo.logic.Caracteristica;
 import org.example.bolsaempleo.logic.Service;
@@ -64,9 +63,10 @@ public class ControllerAdmin {
     // ----------------------------------------------------------------
     @GetMapping("/caracteristicas")
     public String caracteristicas(Model model) {
-        model.addAttribute("raices",       service.caracteristicasRaiz());
+        model.addAttribute("raices",         service.caracteristicasRaiz());
         model.addAttribute("caracteristica", new Caracteristica());
-        model.addAttribute("padres",       service.caracteristicasRaiz());
+        // Ahora cualquier nodo puede ser padre — se pasan TODOS los nodos existentes
+        model.addAttribute("padres",         service.todasLasCaracteristicas());
         return "presentation/admin/ViewCaracteristicas";
     }
 
@@ -77,10 +77,10 @@ public class ControllerAdmin {
 
         if (result.hasErrors()) {
             model.addAttribute("raices", service.caracteristicasRaiz());
-            model.addAttribute("padres", service.caracteristicasRaiz());
+            model.addAttribute("padres", service.todasLasCaracteristicas());
             return "presentation/admin/ViewCaracteristicas";
         }
-        // Si padreId viene como 0 significa que es raíz → padre null
+        // padreId == 0  →  nodo raíz (sin padre)
         if (caracteristica.getPadre() != null && caracteristica.getPadre().getId() == 0) {
             caracteristica.setPadre(null);
         }

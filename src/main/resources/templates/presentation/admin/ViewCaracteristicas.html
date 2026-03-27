@@ -7,30 +7,72 @@
 <main>
     <h2>Características del sistema</h2>
 
-    <!-- Árbol de características -->
+    <!-- ── Árbol de características (hasta 4 niveles) ── -->
     <div class="w75">
         <div th:each="raiz : ${raices}" class="caract-raiz">
-            <strong th:text="${raiz.nombre}"></strong>
-            <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${raiz.id})}"
-               class="delete" style="margin-left:1em;">Eliminar</a>
-            <ul>
-                <li th:each="hijo : ${raiz.hijos}">
-                    <span th:text="${hijo.nombre}"></span>
-                    <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${hijo.id})}"
-                       class="delete" style="margin-left:0.5em;">Eliminar</a>
+
+            <!-- Nivel 0: nodo raíz -->
+            <div style="display:flex; align-items:center; gap:8px;">
+                <strong th:text="${raiz.nombre}"></strong>
+                <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${raiz.id})}"
+                   class="delete" style="font-size:12px; padding:2px 7px;"
+                   onclick="return confirm('¿Eliminar esta categoría y todos sus descendientes?')">
+                    ✕
+                </a>
+            </div>
+
+            <!-- Nivel 1 -->
+            <ul th:if="${!#lists.isEmpty(raiz.hijos)}"
+                style="margin:6px 0 0 20px; padding:0; list-style:disc;">
+                <li th:each="n1 : ${raiz.hijos}" style="margin:4px 0;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span th:text="${n1.nombre}" style="font-size:14px;"></span>
+                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${n1.id})}"
+                           class="delete" style="font-size:11px; padding:1px 6px;"
+                           onclick="return confirm('¿Eliminar?')">✕</a>
+                    </div>
+
+                    <!-- Nivel 2 -->
+                    <ul th:if="${!#lists.isEmpty(n1.hijos)}"
+                        style="margin:4px 0 0 20px; padding:0; list-style:circle;">
+                        <li th:each="n2 : ${n1.hijos}" style="margin:3px 0;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span th:text="${n2.nombre}" style="font-size:13px;"></span>
+                                <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${n2.id})}"
+                                   class="delete" style="font-size:11px; padding:1px 6px;"
+                                   onclick="return confirm('¿Eliminar?')">✕</a>
+                            </div>
+
+                            <!-- Nivel 3 -->
+                            <ul th:if="${!#lists.isEmpty(n2.hijos)}"
+                                style="margin:3px 0 0 20px; padding:0; list-style:square;">
+                                <li th:each="n3 : ${n2.hijos}"
+                                    style="margin:2px 0; font-size:12px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span th:text="${n3.nombre}"></span>
+                                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${n3.id})}"
+                                           class="delete" style="font-size:11px; padding:1px 6px;"
+                                           onclick="return confirm('¿Eliminar?')">✕</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </div>
+
         <p th:if="${#lists.isEmpty(raices)}" class="sin-resultados">
             No hay características registradas.
         </p>
     </div>
 
-    <!-- Formulario agregar característica -->
+    <!-- ── Formulario: agregar nueva característica ── -->
     <div class="form w50">
         <form method="POST" action="/admin/caracteristicas/guardar"
               th:object="${caracteristica}">
             <div class="section">Agregar característica</div>
+
             <div>
                 <div class="label">Nombre</div>
                 <div class="field">
@@ -39,18 +81,40 @@
                           th:errors="*{nombre}" class="error"></span>
                 </div>
             </div>
+
             <div>
                 <div class="label">Categoría padre</div>
                 <div class="field">
+                    <!--
+                        Muestra TODOS los nodos existentes como posibles padres,
+                        con indentación visual según su nivel en el árbol.
+                        Valor 0 = nodo raíz (sin padre).
+                    -->
                     <select th:field="*{padre.id}">
-                        <option value="0">-- Ninguno (categoría raíz) --</option>
-                        <option th:each="p : ${padres}"
-                                th:value="${p.id}"
-                                th:text="${p.nombre}">
-                        </option>
+                        <option value="0">── Ninguno (categoría raíz) ──</option>
+
+                        <th:block th:each="raiz : ${padres}" th:if="${raiz.padre == null}">
+                            <!-- Raíz -->
+                            <option th:value="${raiz.id}"
+                                    th:text="${raiz.nombre}">
+                            </option>
+                            <!-- Nivel 1 -->
+                            <th:block th:each="n1 : ${raiz.hijos}">
+                                <option th:value="${n1.id}"
+                                        th:text="'  › ' + ${n1.nombre}">
+                                </option>
+                                <!-- Nivel 2 -->
+                                <th:block th:each="n2 : ${n1.hijos}">
+                                    <option th:value="${n2.id}"
+                                            th:text="'    › › ' + ${n2.nombre}">
+                                    </option>
+                                </th:block>
+                            </th:block>
+                        </th:block>
                     </select>
                 </div>
             </div>
+
             <div class="section">
                 <input type="submit" value="Guardar" class="button"/>
             </div>

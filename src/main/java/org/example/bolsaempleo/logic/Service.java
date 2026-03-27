@@ -55,6 +55,7 @@ public class Service {
         a.setEstado(estado);
         aplicaciones.save(a);
     }
+
     // ================================================================
     // REGISTRO  (parte pública)
     // ================================================================
@@ -117,19 +118,12 @@ public class Service {
         return habilidades.findByOferenteId(oferenteId);
     }
 
-    /**
-     * Reemplaza la lista completa de habilidades del oferente.
-     * Se borran las anteriores y se guardan las nuevas.
-     */
-
     @Transactional
     public void guardarHabilidades(Oferente oferente, List<OferenteHabilidad> lista) {
         habilidades.deleteByOferenteId(oferente.getId());
-
         for (OferenteHabilidad h : lista) {
             h.setOferente(oferente);
         }
-
         if (!lista.isEmpty()) {
             habilidades.saveAll(lista);
         }
@@ -139,12 +133,25 @@ public class Service {
     // CARACTERÍSTICAS  (administradas por el admin)
     // ================================================================
 
+    /** Solo nodos raíz (sin padre) */
     public List<Caracteristica> caracteristicasRaiz() {
         return caracteristicas.findByPadreIsNull();
     }
 
+    /**
+     * Solo hojas (nodos con padre) — son las que se asignan a puestos y oferentes.
+     * Con múltiples niveles, una hoja es cualquier nodo que NO tiene hijos.
+     */
     public List<Caracteristica> caracteristicasHojas() {
-        return caracteristicas.findByPadreIsNotNull();
+        // Filtramos: nodos cuya lista de hijos esté vacía
+        return caracteristicas.findAll().stream()
+                .filter(c -> c.getHijos().isEmpty())
+                .toList();
+    }
+
+    /** Todos los nodos — para poder elegir cualquiera como padre al crear/editar */
+    public List<Caracteristica> todasLasCaracteristicas() {
+        return caracteristicas.findAll();
     }
 
     public List<Caracteristica> hijosDe(Long padreId) {
@@ -168,27 +175,22 @@ public class Service {
     // PUESTOS
     // ================================================================
 
-    /** Los 5 puestos públicos más recientes para la portada */
     public List<Puesto> puestosRecientes() {
         return puestos.findTop5ByTipoPublicacionAndActivoTrueOrderByFechaRegistroDesc("PUB");
     }
 
-    /** Búsqueda pública (solo PUB) */
     public List<Puesto> buscarPuestosPublicos(String texto) {
         return puestos.buscarPublicosPorDescripcion(texto == null ? "" : texto.trim());
     }
 
-    /** Búsqueda para oferentes aprobados (PUB + PRI) */
     public List<Puesto> buscarTodosPuestos(String texto) {
         return puestos.buscarTodosPorDescripcion(texto == null ? "" : texto);
     }
 
-    /** Puestos activos de la empresa (para el dashboard) */
     public List<Puesto> puestosActivosByEmpresa(Empresa empresa) {
         return puestos.findByEmpresaAndActivoTrue(empresa);
     }
 
-    /** Todos los puestos de la empresa (activos e inactivos) */
     public List<Puesto> todosPuestosByEmpresa(Empresa empresa) {
         return puestos.findByEmpresa(empresa);
     }
@@ -202,7 +204,6 @@ public class Service {
         puestos.save(puesto);
     }
 
-    /** Desactiva un puesto (la empresa ya cubrió la vacante) */
     public void desactivarPuesto(Long id) {
         Puesto puesto = puestoById(id);
         puesto.setActivo(false);
@@ -217,10 +218,6 @@ public class Service {
         return puestosCaracteristicas.findByPuestoId(puestoId);
     }
 
-    /**
-     * Reemplaza la lista completa de características requeridas por el puesto.
-     */
-
     public void guardarCaracteristicasPuesto(Puesto puesto, List<PuestoCaracteristica> lista) {
         puestosCaracteristicas.deleteByPuestoId(puesto.getId());
         for (PuestoCaracteristica pc : lista) {
@@ -233,14 +230,6 @@ public class Service {
     // BÚSQUEDA DE CANDIDATOS
     // ================================================================
 
-    /**
-     * Devuelve oferentes aprobados que cumplen con AL MENOS
-     * minCoincidencias de los requisitos del puesto.
-     *
-     * Cada elemento del resultado es un Object[]:
-     *   [0] → Oferente
-     *   [1] → long (cantidad de coincidencias)
-     */
     public List<Object[]> buscarCandidatos(Long puestoId, long minCoincidencias) {
         return habilidades.buscarCandidatosPorPuesto(puestoId, minCoincidencias);
     }
@@ -282,6 +271,7 @@ public class Service {
     public boolean yaAplico(Long puestoId, Long oferenteId) {
         return aplicaciones.existsByPuestoIdAndOferenteId(puestoId, oferenteId);
     }
+
     public Aplicacion aplicacionById(Long id) {
         return aplicaciones.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Aplicación no encontrada."));
@@ -291,11 +281,20 @@ public class Service {
     // REPORTE  –  puestos por mes (para PDF del admin)
     // ================================================================
 
-    /** Devuelve filas [año (int), mes (int), cantidad (long)] */
     public List<Object[]> reportePuestosPorMes() {
         return puestos.contarPuestosPorMes();
     }
+    /**
+     * Búsqueda pública por características, ordenada por coincidencias.
+     *
+     * Cada elemento del resultado es un Object[]:
+     *   [0] → Puesto
+     *   [1] → long  (cantidad de características coincidentes)
+     *
+     * Si la lista es nula o vacía devuelve lista vacía sin ejecutar la query.
+     */
+    public List<Object[]> buscarPuestosPublicosPorCaracteristicas(List<Long> caracIds) {
+        if (caracIds == null || caracIds.isEmpty()) return List.of();
+        return puestos.buscarPublicosPorCaracteristicas(caracIds);
+    }
 }
-
-
-

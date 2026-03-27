@@ -1,6 +1,6 @@
 package org.example.bolsaempleo.presentation.publica;
 
-
+import org.example.bolsaempleo.logic.Caracteristica;
 import org.example.bolsaempleo.logic.Puesto;
 import org.example.bolsaempleo.logic.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -21,51 +23,72 @@ public class ControllerPublica {
     @Autowired
     private Service service;
 
-    // ----------------------------------------------------------------
-    // Inicializa el texto de búsqueda en sesión
-    // ----------------------------------------------------------------
     @ModelAttribute("textoBusqueda")
     public String textoBusqueda() {
         return "";
     }
 
     // ----------------------------------------------------------------
-    // Portada pública: muestra los 5 puestos más recientes
-    // GET /publica/inicio  (también redirige desde /)
+    // Portada pública
     // ----------------------------------------------------------------
     @GetMapping("/inicio")
     public String inicio(Model model) {
-        List<Puesto> recientes = service.puestosRecientes();
-        model.addAttribute("puestosRecientes", recientes);
+        model.addAttribute("puestosRecientes", service.puestosRecientes());
         return "presentation/publica/ViewInicio";
     }
 
     // ----------------------------------------------------------------
     // Búsqueda pública de puestos
-    // GET  /publica/buscar  → muestra el formulario vacío
-    // POST /publica/buscar  → ejecuta la búsqueda y recarga la vista
     // ----------------------------------------------------------------
     @GetMapping("/buscar")
     public String buscarGet(Model model,
-                            @RequestParam(value = "textoBusqueda", required = false) String textoBusqueda) {
-        List<Puesto> resultados = service.buscarPuestosPublicos(textoBusqueda);
-        model.addAttribute("textoBusqueda", textoBusqueda);
-        model.addAttribute("resultados", resultados);
+                            @RequestParam(value = "textoBusqueda", required = false) String textoBusqueda,
+                            @RequestParam(value = "caracIds", required = false) List<Long> caracIds) {
+
+        // Árbol de categorías para los filtros de la vista
+        model.addAttribute("caracteristicas",       service.caracteristicasRaiz());
+        model.addAttribute("caracIdsSeleccionadas", caracIds != null ? caracIds : new ArrayList<>());
+
+        // Búsqueda por características (devuelve Object[]{Puesto, coincidencias})
+        if (caracIds != null && !caracIds.isEmpty()) {
+            List<Object[]> resultados = service.buscarPuestosPublicosPorCaracteristicas(caracIds);
+            model.addAttribute("resultados",          resultados);
+            model.addAttribute("totalSeleccionadas",  caracIds.size());
+        }
+
+        // Búsqueda por texto (independiente del filtro de características)
+        if (textoBusqueda != null && !textoBusqueda.isBlank()) {
+            model.addAttribute("resultadosTexto", service.buscarPuestosPublicos(textoBusqueda));
+            model.addAttribute("textoBusqueda",   textoBusqueda);
+        }
+
         return "presentation/publica/ViewBuscar";
     }
 
     @PostMapping("/buscar")
     public String buscarPost(Model model,
-                             @RequestParam(value = "textoBusqueda", required = false) String textoBusqueda) {
-        List<Puesto> resultados = service.buscarPuestosPublicos(textoBusqueda);
-        model.addAttribute("textoBusqueda", textoBusqueda);
-        model.addAttribute("resultados", resultados);
+                             @RequestParam(value = "textoBusqueda", required = false) String textoBusqueda,
+                             @RequestParam(value = "caracIds", required = false) List<Long> caracIds) {
+
+        model.addAttribute("caracteristicas",       service.caracteristicasRaiz());
+        model.addAttribute("caracIdsSeleccionadas", caracIds != null ? caracIds : new ArrayList<>());
+
+        if (caracIds != null && !caracIds.isEmpty()) {
+            List<Object[]> resultados = service.buscarPuestosPublicosPorCaracteristicas(caracIds);
+            model.addAttribute("resultados",         resultados);
+            model.addAttribute("totalSeleccionadas", caracIds.size());
+        }
+
+        if (textoBusqueda != null && !textoBusqueda.isBlank()) {
+            model.addAttribute("resultadosTexto", service.buscarPuestosPublicos(textoBusqueda));
+            model.addAttribute("textoBusqueda",   textoBusqueda);
+        }
+
         return "presentation/publica/ViewBuscar";
     }
 
     // ----------------------------------------------------------------
     // Ver detalle de un puesto público
-    // GET /publica/puesto/{id}
     // ----------------------------------------------------------------
     @GetMapping("/puesto/{id}")
     public String verPuesto(@PathVariable Long id, Model model,
@@ -75,16 +98,14 @@ public class ControllerPublica {
             if (!puesto.isActivo() || !"PUB".equals(puesto.getTipoPublicacion())) {
                 return "redirect:/publica/inicio";
             }
-            model.addAttribute("puesto", puesto);
+            model.addAttribute("puesto",          puesto);
             model.addAttribute("caracteristicas", service.caracteristicasByPuesto(id));
 
-            // Verificar si el oferente ya aplicó
             if (ud != null) {
                 try {
-                    Usuario usuario = service.usuarioByCorreo(ud.getUsername());
+                    Usuario  usuario  = service.usuarioByCorreo(ud.getUsername());
                     Oferente oferente = service.oferenteByUsuario(usuario);
-                    boolean yaAplico = service.yaAplico(puesto.getId(), oferente.getId());
-                    model.addAttribute("yaAplico", yaAplico);
+                    model.addAttribute("yaAplico", service.yaAplico(puesto.getId(), oferente.getId()));
                 } catch (Exception ignored) {}
             }
 

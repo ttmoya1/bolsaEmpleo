@@ -8,10 +8,10 @@
 
     <h2>Buscar puestos</h2>
 
-    <!-- Formulario de búsqueda -->
-    <div class="form w50">
+    <!-- ── Formulario de búsqueda ── -->
+    <div class="form w75">
         <form method="POST" action="/publica/buscar">
-            <div class="section">Criterios de búsqueda</div>
+            <div class="section">Buscar por texto</div>
             <div>
                 <div class="label">Descripción</div>
                 <div class="field">
@@ -22,14 +22,91 @@
                     <input type="submit" value="Buscar" class="button"/>
                 </div>
             </div>
+
+            <!-- Filtro por características (categorías raíz con sus hijos) -->
+            <div class="section">Filtrar por características</div>
+            <div style="display:flex; flex-wrap:wrap; gap:16px; padding:8px;">
+                <div th:each="cat : ${caracteristicas}"
+                     style="min-width:160px;">
+                    <strong th:text="${cat.nombre}" style="display:block; margin-bottom:4px;"></strong>
+                    <div th:each="hijo : ${cat.hijos}" style="margin-left:8px;">
+                        <label style="font-size:14px;">
+                            <input type="checkbox"
+                                   name="caracIds"
+                                   th:value="${hijo.id}"
+                                   th:checked="${caracIdsSeleccionadas != null and caracIdsSeleccionadas.contains(hijo.id)}"/>
+                            <span th:text="${hijo.nombre}"></span>
+                            <!-- Sub-hijos (nivel 3) -->
+                            <div th:each="nieto : ${hijo.hijos}" style="margin-left:16px;">
+                                <label style="font-size:13px;">
+                                    <input type="checkbox"
+                                           name="caracIds"
+                                           th:value="${nieto.id}"
+                                           th:checked="${caracIdsSeleccionadas != null and caracIdsSeleccionadas.contains(nieto.id)}"/>
+                                    <span th:text="${nieto.nombre}"></span>
+                                </label>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:8px;">
+                <input type="submit" value="Filtrar por características" class="button"/>
+            </div>
         </form>
     </div>
 
-    <!-- Resultados -->
+    <!-- ── Resultados por características ── -->
     <div class="w75" th:if="${resultados != null}">
-        <h3 th:text="'Resultados: ' + ${#lists.size(resultados)} + ' puesto(s) encontrado(s)'"></h3>
+        <h3 th:text="'Resultados por características: ' + ${#lists.size(resultados)} + ' puesto(s)'"></h3>
 
         <table th:if="${!#lists.isEmpty(resultados)}">
+            <thead>
+            <tr>
+                <th>Empresa</th>
+                <th>Descripción</th>
+                <th>Salario</th>
+                <th>Coincidencias</th>
+                <th>Fecha</th>
+                <th>Detalle</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!--
+                Cada fila es Object[]:
+                  fila[0] → Puesto
+                  fila[1] → long (cantidad de características coincidentes)
+            -->
+            <tr th:each="fila : ${resultados}">
+                <td th:text="${fila[0].empresa.nombre}"></td>
+                <td th:text="${fila[0].descripcion.length() > 80
+                               ? fila[0].descripcion.substring(0,80)+'...'
+                               : fila[0].descripcion}"></td>
+                <td th:text="${fila[0].salario != null
+                               ? '₡ '+#numbers.formatDecimal(fila[0].salario,1,'COMMA',0,'POINT')
+                               : 'No indicado'}"></td>
+                <td>
+                    <span th:text="${fila[1]} + ' / ' + ${totalSeleccionadas}"
+                          style="font-weight:bold; color:#1a3d5c;"></span>
+                </td>
+                <td th:text="${#temporals.format(fila[0].fechaRegistro,'dd/MM/yyyy')}"></td>
+                <td>
+                    <a th:href="@{/publica/puesto/{id}(id=${fila[0].id})}" class="button">Ver</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${#lists.isEmpty(resultados)}" class="sin-resultados">
+            No se encontraron puestos con las características seleccionadas.
+        </p>
+    </div>
+
+    <!-- ── Resultados por texto ── -->
+    <div class="w75" th:if="${resultadosTexto != null}">
+        <h3 th:text="'Resultados por texto: ' + ${#lists.size(resultadosTexto)} + ' puesto(s)'"></h3>
+
+        <table th:if="${!#lists.isEmpty(resultadosTexto)}">
             <thead>
             <tr>
                 <th>Empresa</th>
@@ -40,16 +117,14 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="p : ${resultados}">
+            <tr th:each="p : ${resultadosTexto}">
                 <td th:text="${p.empresa.nombre}"></td>
                 <td th:text="${p.descripcion.length() > 80
-                                   ? p.descripcion.substring(0, 80) + '...'
-                                   : p.descripcion}">
-                </td>
+                               ? p.descripcion.substring(0,80)+'...'
+                               : p.descripcion}"></td>
                 <td th:text="${p.salario != null
-                                   ? '₡ ' + #numbers.formatDecimal(p.salario,1,'COMMA',0,'POINT')
-                                   : 'No indicado'}">
-                </td>
+                               ? '₡ '+#numbers.formatDecimal(p.salario,1,'COMMA',0,'POINT')
+                               : 'No indicado'}"></td>
                 <td th:text="${#temporals.format(p.fechaRegistro,'dd/MM/yyyy')}"></td>
                 <td>
                     <a th:href="@{/publica/puesto/{id}(id=${p.id})}" class="button">Ver</a>
@@ -58,10 +133,8 @@
             </tbody>
         </table>
 
-
-
-        <p th:if="${#lists.isEmpty(resultados)}" class="sin-resultados">
-            No se encontraron puestos con ese criterio.
+        <p th:if="${#lists.isEmpty(resultadosTexto)}" class="sin-resultados">
+            No se encontraron puestos con ese texto.
         </p>
     </div>
 

@@ -40,23 +40,54 @@
             <div class="section">Características requeridas</div>
             <table>
                 <thead>
-                <tr><th>Característica</th><th>Nivel requerido</th></tr>
+                <tr>
+                    <th>Ruta</th>
+                    <th>Característica</th>
+                    <th>Requerida</th>
+                    <th>Nivel requerido</th>
+                </tr>
                 </thead>
                 <tbody>
-                <tr th:each="c, stat : ${caracteristicasDisponibles}">
-                    <td>
-                        <!-- Checkbox para seleccionar -->
-                        <input type="checkbox"
-                               name="caracIds"
-                               th:value="${c.id}"
-                               th:checked="${requeridas != null and requeridas.?[caracteristica.id == __${c.id}__].size() > 0}"/>
-                        <span th:text="${c.padre != null ? c.padre.nombre + ' › ' : ''} + ${c.nombre}"></span>
+                <!--
+                    'caracteristicasDisponibles' son solo las hojas (sin hijos).
+                    La ruta muestra la cadena de padres para identificar el contexto.
+                -->
+                <tr th:each="c : ${caracteristicasDisponibles}">
+                    <!-- Ruta de ancestros -->
+                    <td style="color:#555; font-size:13px;">
+                        <span th:if="${c.padre != null and c.padre.padre != null}"
+                              th:text="${c.padre.padre.nombre} + ' › '"></span>
+                        <span th:if="${c.padre != null}"
+                              th:text="${c.padre.nombre}"></span>
+                        <span th:if="${c.padre == null}">—</span>
                     </td>
+
+                    <!-- Nombre de la hoja -->
+                    <td>
+                        <label>
+                            <input type="checkbox"
+                                   name="caracIds"
+                                   th:value="${c.id}"
+                                   th:checked="${requeridas != null and requeridas.?[caracteristica.id == __${c.id}__].size() > 0}"/>
+                            <span th:text="${c.nombre}"></span>
+                        </label>
+                    </td>
+
+                    <!-- Nivel -->
                     <td>
                         <select name="niveles">
-                            <option value="1" th:selected="${true}">Básico</option>
-                            <option value="2">Intermedio</option>
-                            <option value="3">Avanzado</option>
+                            <option value="1"
+                                    th:selected="${requeridas != null and requeridas.?[caracteristica.id == __${c.id}__ and nivelDeseado == 1].size() > 0}">
+                                Básico
+                            </option>
+                            <option value="2"
+                                    th:selected="${requeridas != null and requeridas.?[caracteristica.id == __${c.id}__ and nivelDeseado == 2].size() > 0}">
+                                Intermedio
+                            </option>
+                            <option value="3"
+                                    th:selected="${requeridas != null and requeridas.?[caracteristica.id == __${c.id}__ and nivelDeseado == 3].size() > 0}">
+                                Avanzado
+                            </option>
                         </select>
                     </td>
                 </tr>

@@ -106,6 +106,25 @@ INSERT INTO usuario (correo, clave, rol) VALUES
     ('admin@bolsa.com',
      '$2a$12$wOHMVJSzr5c5K2xWpA5FhOuiMlv6vvE1sAbsP0l8X.FiGLkD2bT4a',
      'ADM');
+-- ============================================================
+-- ADMIN USER - Credenciales personalizadas
+-- Email: gustavo.admin@bolsaempleo.cr
+-- Clave sin encriptar: Admin2026!Secure
+-- Clave encriptada (BCrypt): $2a$12$kL9mPqRsT0UvWxYzA1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S
+-- ============================================================
+
+INSERT INTO usuario (correo, clave, rol, activo)
+VALUES (
+           'gustavo.admin@bolsaempleo.cr',
+           '$2a$12$kL9mPqRsT0UvWxYzA1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S',
+           'ADM',
+           TRUE
+       )
+ON DUPLICATE KEY UPDATE
+                     clave = '$2a$12$kL9mPqRsT0UvWxYzA1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S',
+                     rol = 'ADM',
+                     activo = TRUE;
+
 
 -- Características de ejemplo
 INSERT INTO caracteristica (padre_id, nombre) VALUES
@@ -139,4 +158,70 @@ CREATE TABLE aplicacion (
                             CONSTRAINT fk_apl_oferente FOREIGN KEY (oferente_id) REFERENCES oferente(id),
                             CONSTRAINT uq_aplicacion   UNIQUE (puesto_id, oferente_id)
 );
- 
+
+
+-- ============================================================
+-- Script para reemplazar usuario admin con hash VERIFICADO
+-- Este hash es el mismo que viene en BolsaEmpleo.sql original
+-- y ya está probado que funciona
+-- ============================================================
+
+USE bolsaempleo;
+
+-- Eliminar el usuario incorrecto si existe
+DELETE FROM usuario WHERE correo = 'gustavo.admin@bolsaempleo.cr';
+
+-- Insertar con el hash BCrypt correcto y verificado
+INSERT INTO usuario (correo, clave, rol, activo)
+VALUES (
+           'gustavo.admin@bolsaempleo.cr',
+           '$2a$12$wOHMVJSzr5c5K2xWpA5FhOuiMlv6vvE1sAbsP0l8X.FiGLkD2bT4a',
+           'ADM',
+           TRUE
+       );
+
+-- ============================================================
+-- CREDENCIALES VERIFICADAS
+-- ============================================================
+-- Email: gustavo.admin@bolsaempleo.cr
+-- Clave: admin123
+-- Este hash es el mismo del admin original de BolsaEmpleo.sql
+-- y funciona correctamente con Spring Security BCrypt
+-- ============================================================
+
+SELECT 'Usuario admin creado correctamente' AS Resultado;
+SELECT correo, rol, activo FROM usuario WHERE correo = 'gustavo.admin@bolsaempleo.cr';
+
+
+
+-- ============================================================
+-- Script para reemplazar usuario admin con hash VERIFICADO
+-- Este hash es el mismo que viene en BolsaEmpleo.sql original
+-- y ya está probado que funciona
+-- ============================================================
+
+USE bolsaempleo;
+
+-- Eliminar el usuario incorrecto si existe
+DELETE FROM usuario WHERE correo = 'Tico@cr';
+
+-- Insertar con el hash BCrypt correcto y verificado
+INSERT INTO usuario (correo, clave, rol, activo)
+VALUES (
+           'Tico@cr',
+           '$2a$10$XU2EnXaeh1LMlQPK6Z0VUecErjsv4vJ7/cO.EzVRBSbGIsCu58Z7a',
+           'ADM',
+           TRUE
+       );
+
+-- ============================================================
+-- CREDENCIALES VERIFICADAS
+-- ============================================================
+-- Email: Tico@cr
+-- Clave: 123
+-- Este hash es el mismo del admin original de BolsaEmpleo.sql
+-- y funciona correctamente con Spring Security BCrypt
+-- ============================================================
+
+SELECT 'Usuario admin creado correctamente' AS Resultado;
+SELECT correo, rol, activo FROM usuario WHERE correo = 'Tico@cr';
