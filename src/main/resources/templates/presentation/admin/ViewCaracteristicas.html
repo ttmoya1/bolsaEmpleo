@@ -4,124 +4,138 @@
 <body>
 <header th:replace="~{presentation/fragments :: header}"></header>
 <nav    th:replace="~{presentation/fragments :: nav}"></nav>
-<main>
-    <h2>Características del sistema</h2>
+<main style="align-items:stretch;">
 
-    <!-- ── Árbol de características (hasta 4 niveles) ── -->
-    <div class="w75">
-        <div th:each="raiz : ${raices}" class="caract-raiz">
+    <h2 style="width:95%;">Características del sistema</h2>
 
-            <!-- Nivel 0: nodo raíz -->
-            <div style="display:flex; align-items:center; gap:8px;">
-                <strong th:text="${raiz.nombre}"></strong>
-                <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${raiz.id})}"
-                   class="delete" style="font-size:12px; padding:2px 7px;"
-                   onclick="return confirm('¿Eliminar esta categoría y todos sus descendientes?')">
-                    ✕
+    <div style="display:flex; gap:12px; width:95%; align-items:flex-start;">
+
+        <!-- ══════════════════════════════════════════════════════════
+             PANEL CENTRAL — árbol navegable
+        ══════════════════════════════════════════════════════════ -->
+        <div style="flex:1; background:#f2f2f2; border:1px solid #ccc;
+                    border-radius:8px; overflow:hidden;">
+
+            <!--
+                BREADCRUMB
+                "Raíz" es virtual: apunta a /admin/caracteristicas sin nodoId.
+            -->
+            <div style="background:#e0e8f0; padding:7px 12px; font-size:12px;
+                        border-bottom:1px solid #ccc; display:flex; flex-wrap:wrap;
+                        align-items:center; gap:4px; min-height:34px;">
+
+                <!-- Raíz virtual — siempre visible -->
+                <a href="/admin/caracteristicas"
+                   style="color:#2c5f8a; font-weight:bold; text-decoration:none;">
+                    Raíz
                 </a>
+
+                <!-- Segmentos reales -->
+                <th:block th:each="nodo : ${ruta}">
+                    <span style="color:#999; padding:0 2px;">›</span>
+                    <a th:href="@{/admin/caracteristicas(nodoId=${nodo.id})}"
+                       style="color:#2c5f8a; text-decoration:none;">
+                        <span th:text="${nodo.nombre}"></span>
+                    </a>
+                </th:block>
             </div>
 
-            <!-- Nivel 1 -->
-            <ul th:if="${!#lists.isEmpty(raiz.hijos)}"
-                style="margin:6px 0 0 20px; padding:0; list-style:disc;">
-                <li th:each="n1 : ${raiz.hijos}" style="margin:4px 0;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span th:text="${n1.nombre}" style="font-size:14px;"></span>
-                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${n1.id})}"
-                           class="delete" style="font-size:11px; padding:1px 6px;"
-                           onclick="return confirm('¿Eliminar?')">✕</a>
+            <!-- Hijos del nodo actual -->
+            <div style="padding:10px; min-height:220px;">
+
+                <div th:if="${#lists.isEmpty(hijos)}"
+                     class="sin-resultados" style="padding:16px 0; text-align:center;">
+                    No hay subcategorías en este nivel.
+                </div>
+
+                <!-- Nodos con hijos propios: fondo blanco + flecha › -->
+                <div th:each="hijo : ${hijos}" th:if="${!hijo.hijos.isEmpty()}">
+                    <div style="display:flex; align-items:center; justify-content:space-between;
+                                padding:7px 10px; border-radius:6px; margin-bottom:3px;
+                                background:white; border:1px solid #ddd;">
+                        <a th:href="@{/admin/caracteristicas(nodoId=${hijo.id})}"
+                           style="color:#1a3d5c; text-decoration:none; font-size:14px; flex:1;">
+                            <span th:text="${hijo.nombre}"></span>
+                            <span style="color:#999; font-size:12px; margin-left:6px;">›</span>
+                        </a>
+                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${hijo.id}, nodoId=${nodoId})}"
+                           style="color:#c0392b; font-size:18px; text-decoration:none;
+                                  padding:0 6px; line-height:1; flex-shrink:0;"
+                           onclick="return confirm('¿Eliminar esta categoría y todos sus descendientes?')">×</a>
                     </div>
+                </div>
 
-                    <!-- Nivel 2 -->
-                    <ul th:if="${!#lists.isEmpty(n1.hijos)}"
-                        style="margin:4px 0 0 20px; padding:0; list-style:circle;">
-                        <li th:each="n2 : ${n1.hijos}" style="margin:3px 0;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span th:text="${n2.nombre}" style="font-size:13px;"></span>
-                                <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${n2.id})}"
-                                   class="delete" style="font-size:11px; padding:1px 6px;"
-                                   onclick="return confirm('¿Eliminar?')">✕</a>
-                            </div>
-
-                            <!-- Nivel 3 -->
-                            <ul th:if="${!#lists.isEmpty(n2.hijos)}"
-                                style="margin:3px 0 0 20px; padding:0; list-style:square;">
-                                <li th:each="n3 : ${n2.hijos}"
-                                    style="margin:2px 0; font-size:12px;">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span th:text="${n3.nombre}"></span>
-                                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${n3.id})}"
-                                           class="delete" style="font-size:11px; padding:1px 6px;"
-                                           onclick="return confirm('¿Eliminar?')">✕</a>
-                                    </div>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+                <!-- Nodos hoja: fondo azul claro -->
+                <div th:each="hijo : ${hijos}" th:if="${hijo.hijos.isEmpty()}">
+                    <div style="display:flex; align-items:center; justify-content:space-between;
+                                padding:7px 10px; border-radius:6px; margin-bottom:3px;
+                                background:#e8f0f7; border:1px solid #2c5f8a;">
+                        <span th:text="${hijo.nombre}"
+                              style="color:#1a3d5c; font-size:14px; flex:1;"></span>
+                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${hijo.id}, nodoId=${nodoId})}"
+                           style="color:#c0392b; font-size:18px; text-decoration:none;
+                                  padding:0 6px; line-height:1; flex-shrink:0;"
+                           onclick="return confirm('¿Eliminar esta característica?')">×</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <p th:if="${#lists.isEmpty(raices)}" class="sin-resultados">
-            No hay características registradas.
-        </p>
-    </div>
+        <!-- ══════════════════════════════════════════════════════════
+             PANEL DERECHO — agregar nueva característica
+        ══════════════════════════════════════════════════════════ -->
+        <div style="width:260px; flex-shrink:0; background:#f2f2f2;
+                    border:1px solid #ccc; border-radius:8px; overflow:hidden;">
 
-    <!-- ── Formulario: agregar nueva característica ── -->
-    <div class="form w50">
-        <form method="POST" action="/admin/caracteristicas/guardar"
-              th:object="${caracteristica}">
-            <div class="section">Agregar característica</div>
-
-            <div>
-                <div class="label">Nombre</div>
-                <div class="field">
-                    <input type="text" th:field="*{nombre}" required/>
-                    <span th:if="${#fields.hasErrors('nombre')}"
-                          th:errors="*{nombre}" class="error"></span>
-                </div>
+            <div class="section" style="margin:0; border-radius:0;">
+                Agregar característica
             </div>
 
-            <div>
-                <div class="label">Categoría padre</div>
-                <div class="field">
-                    <!--
-                        Muestra TODOS los nodos existentes como posibles padres,
-                        con indentación visual según su nivel en el árbol.
-                        Valor 0 = nodo raíz (sin padre).
-                    -->
-                    <select th:field="*{padre.id}">
-                        <option value="0">── Ninguno (categoría raíz) ──</option>
+            <div style="padding:12px; min-height:220px;">
+                <form method="POST" action="/admin/caracteristicas/guardar">
 
-                        <th:block th:each="raiz : ${padres}" th:if="${raiz.padre == null}">
-                            <!-- Raíz -->
-                            <option th:value="${raiz.id}"
-                                    th:text="${raiz.nombre}">
+                    <!-- nodoId para mantener la posición al redirigir -->
+                    <input type="hidden" name="nodoId" th:value="${nodoId}"/>
+
+                    <!-- Nombre -->
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size:12px; color:#555; margin-bottom:4px;">
+                            Nombre
+                        </div>
+                        <input type="text" name="nombre" required
+                               placeholder="Ej: React, Inglés..."
+                               style="width:100%; box-sizing:border-box; font-size:13px;"/>
+                    </div>
+
+                    <!-- Categoría padre -->
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:12px; color:#555; margin-bottom:4px;">
+                            Categoría padre
+                        </div>
+                        <select name="padreId" style="width:100%; font-size:13px;">
+
+                            <option th:value="${nodoId != null ? nodoId : 0}"
+                                    th:text="${nodoPadre != null ? nodoPadre.nombre : '── Ninguno (raíz) ──'}">
                             </option>
-                            <!-- Nivel 1 -->
-                            <th:block th:each="n1 : ${raiz.hijos}">
-                                <option th:value="${n1.id}"
-                                        th:text="'  › ' + ${n1.nombre}">
-                                </option>
-                                <!-- Nivel 2 -->
-                                <th:block th:each="n2 : ${n1.hijos}">
-                                    <option th:value="${n2.id}"
-                                            th:text="'    › › ' + ${n2.nombre}">
-                                    </option>
-                                </th:block>
-                            </th:block>
-                        </th:block>
-                    </select>
-                </div>
-            </div>
+                            <option th:each="hijo : ${hijos}"
+                                    th:value="${hijo.id}"
+                                    th:text="${'  › ' + hijo.nombre}">
+                            </option>
+                        </select>
+                    </div>
 
-            <div class="section">
-                <input type="submit" value="Guardar" class="button"/>
+                    <input type="submit" value="Guardar característica" class="button"
+                           style="width:100%;"/>
+                </form>
             </div>
-        </form>
+        </div>
+
     </div>
 
-    <a th:href="@{/admin/dashboard}" class="button">Regresar</a>
+    <div style="margin-top:16px; width:95%;">
+        <a th:href="@{/admin/dashboard}" class="button">Regresar al panel</a>
+    </div>
+
 </main>
 <footer th:replace="~{presentation/fragments :: footer}"></footer>
 </body>
