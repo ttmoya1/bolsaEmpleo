@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
         String rutaAbsoluta = "file:" + Paths.get("uploads/curricula/")
                 .toAbsolutePath()
                 .toString()
-                .replace("\\", "/")  // compatibilidad Windows
+                .replace("\\", "/")
                 + "/";
 
         registry.addResourceHandler("/curricula/**")
