@@ -11,14 +11,7 @@
 
     <table th:if="${!#lists.isEmpty(puestos)}">
         <thead>
-        <tr>
-            <th>Descripción</th>
-            <th>Salario</th>
-            <th>Tipo</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
-        </tr>
+        <tr><th>Descripción</th><th>Salario</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
         </thead>
         <tbody>
         <tr th:each="p : ${puestos}">

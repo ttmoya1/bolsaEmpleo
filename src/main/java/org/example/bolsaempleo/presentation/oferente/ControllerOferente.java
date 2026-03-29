@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -21,7 +22,6 @@ public class ControllerOferente {
     @Autowired
     private Service service;
 
-    // Ruta donde se guardan los PDFs (dentro de resources/static o configurable)
     private static final String PDF_DIR = "src/main/resources/static/curricula/";
 
     private Oferente getOferente(UserDetails ud) {
@@ -55,36 +55,132 @@ public class ControllerOferente {
     }
 
     // ----------------------------------------------------------------
-    // HABILIDADES  –  ver y editar
+    // HABILIDADES  –  navegación por árbol (sin JavaScript)
+    //
+    // La raíz es VIRTUAL (no existe en BD).
+    // Los nodos con padre=null son el primer nivel navegable
+    // (Lenguajes de programación, Web, Bases de datos, Idiomas, etc.)
+    //
+    // nodoId ausente o nodoId=0  →  mostrar los nodos con padre=null
+    // nodoId=X                   →  mostrar los hijos de X
     // ----------------------------------------------------------------
+
+    /**
+     * Construye la ruta desde el primer nivel hasta el nodo actual.
+     * Para cada nodo sube por padre hasta llegar a un nodo con padre=null
+     * (que es el primer nivel visible, no la raíz virtual).
+     * Devuelve lista vacía si nodoId es null (estamos en la raíz virtual).
+     */
+    private List<Caracteristica> buildRuta(Long nodoId) {
+        if (nodoId == null) return Collections.emptyList();
+        List<Caracteristica> ruta = new ArrayList<>();
+        Caracteristica actual = service.caracteristicaById(nodoId);
+        // Sube incluyendo el nodo actual hasta llegar a un nodo raíz (padre null)
+        while (actual != null) {
+            ruta.add(0, actual);
+            actual = actual.getPadre();
+        }
+        return ruta;
+    }
+
     @GetMapping("/habilidades")
-    public String habilidadesGet(@AuthenticationPrincipal UserDetails ud, Model model) {
+    public String habilidadesGet(
+            @AuthenticationPrincipal UserDetails ud,
+            @RequestParam(value = "nodoId", required = false) Long nodoId,
+            Model model) {
+
         Oferente oferente = getOferente(ud);
+
+        // Hijos a mostrar en el panel central
+        List<Caracteristica> hijos;
+        if (nodoId == null) {
+            // Raíz virtual → mostrar todos los nodos con padre=null
+            hijos = service.caracteristicasRaiz();
+        } else {
+            hijos = service.hijosDe(nodoId);
+        }
+
+        // Ruta del breadcrumb (vacía cuando estamos en la raíz virtual)
+        List<Caracteristica> ruta = buildRuta(nodoId);
+
+        // Panel derecho: todos los hijos disponibles para agregar
+        List<Caracteristica> disponibles = hijos;
+
         model.addAttribute("oferente",    oferente);
         model.addAttribute("habilidades", service.habilidadesByOferente(oferente.getId()));
-        model.addAttribute("disponibles", service.caracteristicasHojas());
+        model.addAttribute("hijos",       hijos);
+        model.addAttribute("disponibles", disponibles);
+        model.addAttribute("ruta",        ruta);
+        // nodoId null se pasa tal cual — la vista lo usa para saber si estamos en raíz
+        model.addAttribute("nodoId",      nodoId);
+
         return "presentation/oferente/ViewHabilidades";
     }
 
     @PostMapping("/habilidades/guardar")
     public String habilidadesPost(
             @AuthenticationPrincipal UserDetails ud,
-            @RequestParam(value = "caracIds", required = false) List<Long>    caracIds,
-            @RequestParam(value = "niveles",  required = false) List<Integer> niveles) {
+            @RequestParam("caracId")                           Long  caracId,
+            @RequestParam(value = "nivel", defaultValue = "1") int   nivel,
+            @RequestParam(value = "nodoId", required = false)  Long  nodoId) {
 
         Oferente oferente = getOferente(ud);
 
-        List<OferenteHabilidad> lista = new ArrayList<>();
-        if (caracIds != null) {
-            for (int i = 0; i < caracIds.size(); i++) {
-                OferenteHabilidad h = new OferenteHabilidad();
-                h.setCaracteristica(service.caracteristicaById(caracIds.get(i)));
-                h.setNivel(niveles != null && i < niveles.size() ? niveles.get(i) : 1);
-                lista.add(h);
+        List<OferenteHabilidad> existentes = service.habilidadesByOferente(oferente.getId());
+        List<OferenteHabilidad> nueva = new ArrayList<>();
+
+        boolean yaExiste = false;
+        for (OferenteHabilidad h : existentes) {
+            OferenteHabilidad copia = new OferenteHabilidad();
+            copia.setCaracteristica(service.caracteristicaById(h.getCaracteristica().getId()));
+            if (h.getCaracteristica().getId().equals(caracId)) {
+                copia.setNivel(nivel);
+                yaExiste = true;
+            } else {
+                copia.setNivel(h.getNivel());
+            }
+            nueva.add(copia);
+        }
+
+        if (!yaExiste) {
+            OferenteHabilidad agregada = new OferenteHabilidad();
+            agregada.setCaracteristica(service.caracteristicaById(caracId));
+            agregada.setNivel(nivel);
+            nueva.add(agregada);
+        }
+
+        service.guardarHabilidades(oferente, nueva);
+
+        String redirect = "/oferente/habilidades";
+        if (nodoId != null) redirect += "?nodoId=" + nodoId;
+        return "redirect:" + redirect;
+    }
+
+    @GetMapping("/habilidades/eliminar/{caracId}")
+    public String eliminarHabilidad(
+            @AuthenticationPrincipal UserDetails ud,
+            @PathVariable Long caracId,
+            @RequestParam(value = "nodoId", required = false) Long nodoId) {
+
+        Oferente oferente = getOferente(ud);
+
+        List<OferenteHabilidad> existentes = service.habilidadesByOferente(oferente.getId());
+        List<OferenteHabilidad> nueva = new ArrayList<>();
+
+        for (OferenteHabilidad h : existentes) {
+            if (!h.getCaracteristica().getId().equals(caracId)) {
+                OferenteHabilidad copia = new OferenteHabilidad();
+                copia.setCaracteristica(service.caracteristicaById(h.getCaracteristica().getId()));
+                copia.setNivel(h.getNivel());
+                nueva.add(copia);
             }
         }
-        service.guardarHabilidades(oferente, lista);
-        return "redirect:/oferente/habilidades";
+
+        service.guardarHabilidades(oferente, nueva);
+
+        String redirect = "/oferente/habilidades";
+        if (nodoId != null) redirect += "?nodoId=" + nodoId;
+        return "redirect:" + redirect;
     }
 
     // ----------------------------------------------------------------
@@ -127,7 +223,7 @@ public class ControllerOferente {
     }
 
     // ----------------------------------------------------------------
-    // BUSCAR PUESTOS (PUB + PRI para oferentes aprobados)
+    // BUSCAR PUESTOS
     // ----------------------------------------------------------------
     @GetMapping("/buscar")
     public String buscarGet(Model model,

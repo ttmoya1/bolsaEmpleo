@@ -4,50 +4,170 @@
 <body>
 <header th:replace="~{presentation/fragments :: header}"></header>
 <nav    th:replace="~{presentation/fragments :: nav}"></nav>
-<main>
-    <h2>Mis habilidades</h2>
-    <div class="form w75">
-        <form method="POST" action="/oferente/habilidades/guardar">
-            <div class="section">Seleccione sus habilidades y nivel</div>
-            <table>
-                <thead>
-                <tr><th>Categoría</th><th>Habilidad</th><th>Nivel</th></tr>
-                </thead>
-                <tbody>
-                <tr th:each="c : ${disponibles}">
-                    <td th:text="${c.padre != null ? c.padre.nombre : '-'}"></td>
-                    <td>
-                        <input type="checkbox"
-                               name="caracIds"
-                               th:value="${c.id}"
-                               th:checked="${habilidades.?[caracteristica.id == __${c.id}__].size() > 0}"/>
-                        <span th:text="${c.nombre}"></span>
-                    </td>
-                    <td>
-                        <select name="niveles">
-                            <option value="1"
-                                    th:selected="${habilidades.?[caracteristica.id == __${c.id}__ and nivel == 1].size() > 0}">
-                                Básico
-                            </option>
-                            <option value="2"
-                                    th:selected="${habilidades.?[caracteristica.id == __${c.id}__ and nivel == 2].size() > 0}">
-                                Intermedio
-                            </option>
-                            <option value="3"
-                                    th:selected="${habilidades.?[caracteristica.id == __${c.id}__ and nivel == 3].size() > 0}">
-                                Avanzado
+<main style="align-items:stretch;">
+
+    <h2 style="width:95%;">Mis habilidades</h2>
+
+    <div style="display:flex; gap:12px; width:95%; align-items:flex-start;">
+
+        <!-- ══════════════════════════════════════════════════════════
+             PANEL IZQUIERDO — mis características asociadas
+        ══════════════════════════════════════════════════════════ -->
+        <div style="width:220px; flex-shrink:0; background:#f2f2f2;
+                    border:1px solid #ccc; border-radius:8px; overflow:hidden;">
+
+            <div class="section" style="margin:0; border-radius:0;">
+                Mis características
+            </div>
+
+            <div style="padding:8px; min-height:220px;">
+
+                <div th:if="${#lists.isEmpty(habilidades)}"
+                     class="sin-resultados" style="text-align:center; padding:16px 0;">
+                    Sin habilidades aún.
+                </div>
+
+                <div th:each="h : ${habilidades}"
+                     style="display:flex; align-items:center; justify-content:space-between;
+                            padding:5px 8px; border-radius:6px; background:white;
+                            border:1px solid #ddd; margin-bottom:4px; font-size:13px;">
+                    <div>
+                        <div th:text="${h.caracteristica.nombre}"
+                             style="color:#1a3d5c; font-weight:bold;"></div>
+                        <div th:switch="${h.nivel}" style="color:#666; font-size:11px;">
+                            <span th:case="1">Básico</span>
+                            <span th:case="2">Intermedio</span>
+                            <span th:case="3">Avanzado</span>
+                        </div>
+                    </div>
+                    <a th:href="@{/oferente/habilidades/eliminar/{cid}(cid=${h.caracteristica.id}, nodoId=${nodoId})}"
+                       style="color:#c0392b; font-size:16px; text-decoration:none; padding:0 4px; line-height:1;"
+                       onclick="return confirm('¿Eliminar esta habilidad?')">×</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             PANEL CENTRAL — árbol navegable
+        ══════════════════════════════════════════════════════════ -->
+        <div style="flex:1; background:#f2f2f2; border:1px solid #ccc;
+                    border-radius:8px; overflow:hidden;">
+
+            <!--
+                BREADCRUMB
+                "Raíz" es virtual: apunta a /oferente/habilidades sin nodoId.
+                Siempre se muestra. Luego vienen los nodos de la ruta real.
+            -->
+            <div style="background:#e0e8f0; padding:7px 12px; font-size:12px;
+                        border-bottom:1px solid #ccc; display:flex; flex-wrap:wrap;
+                        align-items:center; gap:4px; min-height:34px;">
+
+                <!-- Raíz virtual — siempre visible, enlace sin parámetros -->
+                <a href="/oferente/habilidades"
+                   style="color:#2c5f8a; font-weight:bold; text-decoration:none;">
+                    Raíz
+                </a>
+
+                <!-- Segmentos reales: Lenguajes › Java, etc. -->
+                <th:block th:each="nodo : ${ruta}">
+                    <span style="color:#999; padding:0 2px;">›</span>
+                    <a th:href="@{/oferente/habilidades(nodoId=${nodo.id})}"
+                       style="color:#2c5f8a; text-decoration:none;">
+                        <span th:text="${nodo.nombre}"></span>
+                    </a>
+                </th:block>
+            </div>
+
+            <!-- Hijos del nodo actual -->
+            <div style="padding:10px; min-height:220px;">
+
+                <div th:if="${#lists.isEmpty(hijos)}"
+                     class="sin-resultados" style="padding:16px 0; text-align:center;">
+                    Sin subcategorías en este nivel.
+                </div>
+
+                <!-- Nodos con hijos propios: fondo blanco + flecha › -->
+                <div th:each="hijo : ${hijos}" th:if="${!hijo.hijos.isEmpty()}">
+                    <a th:href="@{/oferente/habilidades(nodoId=${hijo.id})}"
+                       style="display:flex; align-items:center; justify-content:space-between;
+                              padding:7px 10px; border-radius:6px; margin-bottom:3px;
+                              background:white; border:1px solid #ddd;
+                              color:#1a3d5c; text-decoration:none; font-size:14px;">
+                        <span th:text="${hijo.nombre}"></span>
+                        <span style="color:#999; font-size:12px;">›</span>
+                    </a>
+                </div>
+
+                <!-- Nodos hoja: fondo azul claro -->
+                <div th:each="hijo : ${hijos}" th:if="${hijo.hijos.isEmpty()}">
+                    <a th:href="@{/oferente/habilidades(nodoId=${hijo.id})}"
+                       style="display:flex; align-items:center; padding:7px 10px;
+                              border-radius:6px; margin-bottom:3px;
+                              background:#e8f0f7; border:1px solid #2c5f8a;
+                              color:#1a3d5c; text-decoration:none; font-size:14px;">
+                        <span th:text="${hijo.nombre}"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             PANEL DERECHO — agregar habilidad
+        ══════════════════════════════════════════════════════════ -->
+        <div style="width:230px; flex-shrink:0; background:#f2f2f2;
+                    border:1px solid #ccc; border-radius:8px; overflow:hidden;">
+
+            <div class="section" style="margin:0; border-radius:0;">
+                Agregar habilidad
+            </div>
+
+            <div style="padding:10px; min-height:220px;">
+
+                <div th:if="${#lists.isEmpty(disponibles)}"
+                     class="sin-resultados" style="text-align:center; padding:16px 8px;">
+                    Navegue el árbol para ver habilidades disponibles.
+                </div>
+
+                <form th:if="${!#lists.isEmpty(disponibles)}"
+                      method="POST" action="/oferente/habilidades/guardar">
+
+                    <!--
+                        nodoId puede ser null cuando estamos en la raíz virtual.
+                        Se pasa vacío en ese caso y el controlador lo ignora.
+                    -->
+                    <input type="hidden" name="nodoId" th:value="${nodoId}"/>
+
+                    <div style="margin-bottom:8px;">
+                        <div style="font-size:12px; color:#555; margin-bottom:4px;">Habilidad</div>
+                        <select name="caracId" style="width:100%; font-size:13px;">
+                            <option th:each="d : ${disponibles}"
+                                    th:value="${d.id}"
+                                    th:text="${d.nombre}">
                             </option>
                         </select>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="section">
-                <input type="submit" value="Guardar habilidades" class="button"/>
+                    </div>
+
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size:12px; color:#555; margin-bottom:4px;">Nivel</div>
+                        <select name="nivel" style="width:100%; font-size:13px;">
+                            <option value="1">Básico</option>
+                            <option value="2">Intermedio</option>
+                            <option value="3">Avanzado</option>
+                        </select>
+                    </div>
+
+                    <input type="submit" value="Guardar habilidad" class="button"
+                           style="width:100%;"/>
+                </form>
             </div>
-        </form>
+        </div>
+
     </div>
-    <a th:href="@{/oferente/dashboard}" class="button">Regresar</a>
+
+    <div style="margin-top:16px; width:95%;">
+        <a th:href="@{/oferente/dashboard}" class="button">Regresar</a>
+    </div>
+
 </main>
 <footer th:replace="~{presentation/fragments :: footer}"></footer>
 </body>
