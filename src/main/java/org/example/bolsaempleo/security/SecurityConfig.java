@@ -1,7 +1,5 @@
 package org.example.bolsaempleo.security;
 
-
-
 import org.example.bolsaempleo.data.UsuarioRepository;
 import org.example.bolsaempleo.logic.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +24,11 @@ public class SecurityConfig {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // ----------------------------------------------------------------
-    // Bean que el Service (y Spring Security) necesitan para bcrypt
-    // ----------------------------------------------------------------
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ----------------------------------------------------------------
-    // Carga el usuario por correo (username = correo en este proyecto)
-    // ----------------------------------------------------------------
     @Bean
     public UserDetailsService userDetailsService() {
         return correo -> {
@@ -52,16 +44,18 @@ public class SecurityConfig {
         };
     }
 
-    // ----------------------------------------------------------------
-    // Reglas de acceso (se ampliarán cuando estén los controllers)
-    // ----------------------------------------------------------------
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/", "/login", "/acceso-denegado", "/dashboard", "/publica/**", "/registro/**").permitAll()
+                        .requestMatchers(
+                                "/css/**", "/js/**", "/images/**",
+                                "/webjars/**", "/favicon.ico",
+                                "/curricula/**"          // ← PDFs subidos por oferentes
+                        ).permitAll()
+                        .requestMatchers("/", "/login", "/acceso-denegado", "/dashboard",
+                                "/publica/**", "/registro/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADM")
                         .requestMatchers("/empresa/**").hasAuthority("EMP")
                         .requestMatchers("/oferente/**").hasAuthority("OFE")

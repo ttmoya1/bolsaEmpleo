@@ -22,7 +22,13 @@ public class ControllerOferente {
     @Autowired
     private Service service;
 
-    private static final String PDF_DIR = "src/main/resources/static/curricula/";
+    /**
+     * Carpeta FUERA del classpath para que Spring Boot la sirva
+     * en runtime sin necesidad de reempaquetar el JAR.
+     * Se crea automáticamente si no existe.
+     * WebConfig mapea "/curricula/**" → esta carpeta.
+     */
+    private static final String PDF_DIR = "uploads/curricula/";
 
     private Oferente getOferente(UserDetails ud) {
         Usuario usuario = service.usuarioByCorreo(ud.getUsername());
@@ -55,27 +61,12 @@ public class ControllerOferente {
     }
 
     // ----------------------------------------------------------------
-    // HABILIDADES  –  navegación por árbol (sin JavaScript)
-    //
-    // La raíz es VIRTUAL (no existe en BD).
-    // Los nodos con padre=null son el primer nivel navegable
-    // (Lenguajes de programación, Web, Bases de datos, Idiomas, etc.)
-    //
-    // nodoId ausente o nodoId=0  →  mostrar los nodos con padre=null
-    // nodoId=X                   →  mostrar los hijos de X
+    // HABILIDADES  –  navegación por árbol
     // ----------------------------------------------------------------
-
-    /**
-     * Construye la ruta desde el primer nivel hasta el nodo actual.
-     * Para cada nodo sube por padre hasta llegar a un nodo con padre=null
-     * (que es el primer nivel visible, no la raíz virtual).
-     * Devuelve lista vacía si nodoId es null (estamos en la raíz virtual).
-     */
     private List<Caracteristica> buildRuta(Long nodoId) {
         if (nodoId == null) return Collections.emptyList();
         List<Caracteristica> ruta = new ArrayList<>();
         Caracteristica actual = service.caracteristicaById(nodoId);
-        // Sube incluyendo el nodo actual hasta llegar a un nodo raíz (padre null)
         while (actual != null) {
             ruta.add(0, actual);
             actual = actual.getPadre();
@@ -91,19 +82,14 @@ public class ControllerOferente {
 
         Oferente oferente = getOferente(ud);
 
-        // Hijos a mostrar en el panel central
         List<Caracteristica> hijos;
         if (nodoId == null) {
-            // Raíz virtual → mostrar todos los nodos con padre=null
             hijos = service.caracteristicasRaiz();
         } else {
             hijos = service.hijosDe(nodoId);
         }
 
-        // Ruta del breadcrumb (vacía cuando estamos en la raíz virtual)
-        List<Caracteristica> ruta = buildRuta(nodoId);
-
-        // Panel derecho: todos los hijos disponibles para agregar
+        List<Caracteristica> ruta        = buildRuta(nodoId);
         List<Caracteristica> disponibles = hijos;
 
         model.addAttribute("oferente",    oferente);
@@ -111,7 +97,6 @@ public class ControllerOferente {
         model.addAttribute("hijos",       hijos);
         model.addAttribute("disponibles", disponibles);
         model.addAttribute("ruta",        ruta);
-        // nodoId null se pasa tal cual — la vista lo usa para saber si estamos en raíz
         model.addAttribute("nodoId",      nodoId);
 
         return "presentation/oferente/ViewHabilidades";
@@ -127,7 +112,7 @@ public class ControllerOferente {
         Oferente oferente = getOferente(ud);
 
         List<OferenteHabilidad> existentes = service.habilidadesByOferente(oferente.getId());
-        List<OferenteHabilidad> nueva = new ArrayList<>();
+        List<OferenteHabilidad> nueva      = new ArrayList<>();
 
         boolean yaExiste = false;
         for (OferenteHabilidad h : existentes) {
@@ -165,7 +150,7 @@ public class ControllerOferente {
         Oferente oferente = getOferente(ud);
 
         List<OferenteHabilidad> existentes = service.habilidadesByOferente(oferente.getId());
-        List<OferenteHabilidad> nueva = new ArrayList<>();
+        List<OferenteHabilidad> nueva      = new ArrayList<>();
 
         for (OferenteHabilidad h : existentes) {
             if (!h.getCaracteristica().getId().equals(caracId)) {
@@ -196,48 +181,92 @@ public class ControllerOferente {
     public String curriculumPost(
             @AuthenticationPrincipal UserDetails ud,
             @RequestParam("archivo") MultipartFile archivo,
-            Model model) {
+            RedirectAttributes redirectAttrs) {
 
-        if (archivo.isEmpty() || !archivo.getOriginalFilename().endsWith(".pdf")) {
-            model.addAttribute("error", "Debe seleccionar un archivo PDF válido.");
-            model.addAttribute("oferente", getOferente(ud));
-            return "presentation/oferente/ViewCurriculum";
+        if (archivo.isEmpty() ||
+                !archivo.getOriginalFilename().toLowerCase().endsWith(".pdf")) {
+            redirectAttrs.addFlashAttribute("error", "Debe seleccionar un archivo PDF válido.");
+            return "redirect:/oferente/curriculum";
         }
 
         Oferente oferente = getOferente(ud);
         try {
             Path dir = Paths.get(PDF_DIR);
             Files.createDirectories(dir);
-            String nombreArchivo = "cv_" + oferente.getId() + ".pdf";
+
+            // Timestamp en el nombre → rompe caché del navegador en cada subida
+            String nombreArchivo = "cv_" + oferente.getId()
+                    + "_" + System.currentTimeMillis() + ".pdf";
+
+            // Eliminar el PDF anterior para no acumular archivos huérfanos
+            if (oferente.getCurriculumPdf() != null) {
+                String nombreAnterior = oferente.getCurriculumPdf()
+                        .replace("/curricula/", "");
+                Files.deleteIfExists(dir.resolve(nombreAnterior));
+            }
+
             Files.copy(archivo.getInputStream(),
                     dir.resolve(nombreArchivo),
                     StandardCopyOption.REPLACE_EXISTING);
+
+            // URL pública mapeada por WebConfig ("/curricula/**")
             oferente.setCurriculumPdf("/curricula/" + nombreArchivo);
             service.guardarOferente(oferente);
+
+            redirectAttrs.addFlashAttribute("mensaje", "Currículo actualizado correctamente.");
         } catch (IOException e) {
-            model.addAttribute("error", "Error al guardar el archivo: " + e.getMessage());
-            model.addAttribute("oferente", oferente);
-            return "presentation/oferente/ViewCurriculum";
+            redirectAttrs.addFlashAttribute("error",
+                    "Error al guardar el archivo: " + e.getMessage());
         }
-        return "redirect:/oferente/dashboard";
+        return "redirect:/oferente/curriculum";
     }
 
     // ----------------------------------------------------------------
-    // BUSCAR PUESTOS
+    // BUSCAR PUESTOS  –  por texto Y por características
     // ----------------------------------------------------------------
     @GetMapping("/buscar")
-    public String buscarGet(Model model,
-                            @RequestParam(defaultValue = "") String texto) {
-        model.addAttribute("texto",      texto);
-        model.addAttribute("resultados", service.buscarTodosPuestos(texto));
+    public String buscarGet(
+            @AuthenticationPrincipal UserDetails ud,
+            Model model,
+            @RequestParam(defaultValue = "") String texto,
+            @RequestParam(value = "caracIds", required = false) List<Long> caracIds) {
+
+        model.addAttribute("caracteristicas",       service.caracteristicasRaiz());
+        model.addAttribute("caracIdsSeleccionadas", caracIds != null ? caracIds : new ArrayList<>());
+        model.addAttribute("texto", texto);
+
+        if (caracIds != null && !caracIds.isEmpty()) {
+            model.addAttribute("resultadosCarac",    service.buscarPuestosPublicosPorCaracteristicas(caracIds));
+            model.addAttribute("totalSeleccionadas", caracIds.size());
+        }
+
+        if (!texto.isBlank()) {
+            model.addAttribute("resultados", service.buscarTodosPuestos(texto));
+        }
+
         return "presentation/oferente/ViewBuscarPuestos";
     }
 
     @PostMapping("/buscar")
-    public String buscarPost(Model model,
-                             @RequestParam(defaultValue = "") String texto) {
-        model.addAttribute("texto",      texto);
-        model.addAttribute("resultados", service.buscarTodosPuestos(texto));
+    public String buscarPost(
+            @AuthenticationPrincipal UserDetails ud,
+            Model model,
+            @RequestParam(defaultValue = "") String texto,
+            @RequestParam(value = "caracIds", required = false) List<Long> caracIds) {
+
+        model.addAttribute("caracteristicas",       service.caracteristicasRaiz());
+        model.addAttribute("caracIdsSeleccionadas", caracIds != null ? caracIds : new ArrayList<>());
+        model.addAttribute("texto", texto);
+
+        if (caracIds != null && !caracIds.isEmpty()) {
+            model.addAttribute("resultadosCarac",    service.buscarPuestosPublicosPorCaracteristicas(caracIds));
+            model.addAttribute("totalSeleccionadas", caracIds.size());
+        }
+
+        if (!texto.isBlank()) {
+            model.addAttribute("resultados", service.buscarTodosPuestos(texto));
+        }
+
         return "presentation/oferente/ViewBuscarPuestos";
     }
 }
