@@ -20,9 +20,7 @@ public class ControllerRegistro {
     @Autowired
     private Service service;
 
-    // ----------------------------------------------------------------
-    // REGISTRO EMPRESA
-    // ----------------------------------------------------------------
+
     @GetMapping("/empresa")
     public String registroEmpresaGet(Model model) {
         model.addAttribute("usuario", new Usuario());
@@ -49,9 +47,7 @@ public class ControllerRegistro {
         }
     }
 
-    // ----------------------------------------------------------------
-    // REGISTRO OFERENTE
-    // ----------------------------------------------------------------
+
     @GetMapping("/oferente")
     public String registroOferenteGet(Model model) {
         model.addAttribute("usuario", new Usuario());

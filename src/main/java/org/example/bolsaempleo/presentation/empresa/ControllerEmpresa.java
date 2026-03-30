@@ -25,9 +25,7 @@ public class ControllerEmpresa {
         return service.empresaByUsuario(usuario);
     }
 
-    // ----------------------------------------------------------------
-    // DASHBOARD
-    // ----------------------------------------------------------------
+
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal UserDetails ud, Model model) {
         Empresa empresa = getEmpresa(ud);
@@ -36,9 +34,7 @@ public class ControllerEmpresa {
         return "presentation/empresa/ViewDashboard";
     }
 
-    // ----------------------------------------------------------------
-    // PUESTOS  –  listar
-    // ----------------------------------------------------------------
+
     @GetMapping("/puestos")
     public String puestos(@AuthenticationPrincipal UserDetails ud, Model model) {
         Empresa empresa = getEmpresa(ud);
@@ -46,9 +42,7 @@ public class ControllerEmpresa {
         return "presentation/empresa/ViewPuestos";
     }
 
-    // ----------------------------------------------------------------
-    // PUESTOS  –  crear
-    // ----------------------------------------------------------------
+
     @GetMapping("/puestos/nuevo")
     public String nuevoPuestoGet(Model model) {
         model.addAttribute("puesto", new Puesto());
@@ -78,9 +72,7 @@ public class ControllerEmpresa {
         return "redirect:/empresa/puestos";
     }
 
-    // ----------------------------------------------------------------
-    // PUESTOS  –  editar
-    // ----------------------------------------------------------------
+
     @GetMapping("/puestos/editar/{id}")
     public String editarPuestoGet(@PathVariable Long id, Model model) {
         model.addAttribute("puesto", service.puestoById(id));
@@ -110,18 +102,14 @@ public class ControllerEmpresa {
         return "redirect:/empresa/puestos";
     }
 
-    // ----------------------------------------------------------------
-    // PUESTOS  –  desactivar
-    // ----------------------------------------------------------------
+
     @GetMapping("/puestos/desactivar/{id}")
     public String desactivarPuesto(@PathVariable Long id) {
         service.desactivarPuesto(id);
         return "redirect:/empresa/puestos";
     }
 
-    // ----------------------------------------------------------------
-    // BUSCAR CANDIDATOS para un puesto
-    // ----------------------------------------------------------------
+
     @GetMapping("/puestos/{id}/candidatos")
     public String candidatos(@PathVariable Long id, Model model,
                              @RequestParam(defaultValue = "1") long minCoincidencias) {
@@ -135,9 +123,7 @@ public class ControllerEmpresa {
         return "presentation/empresa/ViewCandidatos";
     }
 
-    // ----------------------------------------------------------------
-    // APLICACIONES  –  cambiar estado
-    // ----------------------------------------------------------------
+
     @GetMapping("/aplicaciones/estado/{id}/{estado}")
     public String cambiarEstado(@PathVariable Long id, @PathVariable String estado) {
         Aplicacion apl = service.aplicacionById(id);
@@ -145,9 +131,7 @@ public class ControllerEmpresa {
         return "redirect:/empresa/puestos/" + apl.getPuesto().getId() + "/candidatos";
     }
 
-    // ----------------------------------------------------------------
-    // VER DETALLE DE UN CANDIDATO (oferente)
-    // ----------------------------------------------------------------
+
     @GetMapping("/candidato/{id}")
     public String verCandidato(@PathVariable Long id, Model model) {
         Oferente oferente = service.oferenteById(id);
@@ -156,9 +140,7 @@ public class ControllerEmpresa {
         return "presentation/empresa/ViewDetalleCandidato";
     }
 
-    // ----------------------------------------------------------------
-    // Auxiliar
-    // ----------------------------------------------------------------
+
     private void guardarCaracteristicasPuesto(Puesto puesto,
                                               List<Long> caracIds,
                                               List<Integer> niveles) {

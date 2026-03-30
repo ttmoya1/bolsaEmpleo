@@ -20,9 +20,7 @@ public class ControllerAdmin {
     @Autowired
     private Service service;
 
-    // ----------------------------------------------------------------
-    // DASHBOARD
-    // ----------------------------------------------------------------
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("totalEmpresasPendientes", service.empresasPendientes().size());
@@ -30,9 +28,7 @@ public class ControllerAdmin {
         return "presentation/admin/ViewDashboard";
     }
 
-    // ----------------------------------------------------------------
-    // EMPRESAS PENDIENTES
-    // ----------------------------------------------------------------
+
     @GetMapping("/empresas")
     public String empresas(Model model) {
         model.addAttribute("pendientes", service.empresasPendientes());
@@ -46,9 +42,7 @@ public class ControllerAdmin {
         return "redirect:/admin/empresas";
     }
 
-    // ----------------------------------------------------------------
-    // OFERENTES PENDIENTES
-    // ----------------------------------------------------------------
+
     @GetMapping("/oferentes")
     public String oferentes(Model model) {
         model.addAttribute("pendientes", service.oferentesPendientes());
@@ -62,13 +56,7 @@ public class ControllerAdmin {
         return "redirect:/admin/oferentes";
     }
 
-    // ----------------------------------------------------------------
-    // CARACTERÍSTICAS  –  navegación por árbol (igual que oferente)
-    // ----------------------------------------------------------------
 
-    /**
-     * Construye la ruta de breadcrumb desde la raíz hasta el nodo actual.
-     */
     private List<Caracteristica> buildRuta(Long nodoId) {
         if (nodoId == null) return Collections.emptyList();
         List<Caracteristica> ruta = new ArrayList<>();
@@ -85,7 +73,7 @@ public class ControllerAdmin {
             @RequestParam(value = "nodoId", required = false) Long nodoId,
             Model model) {
 
-        // Hijos a mostrar en el árbol central
+
         List<Caracteristica> hijos;
         if (nodoId == null) {
             hijos = service.caracteristicasRaiz();
@@ -93,10 +81,9 @@ public class ControllerAdmin {
             hijos = service.hijosDe(nodoId);
         }
 
-        // Ruta del breadcrumb
         List<Caracteristica> ruta = buildRuta(nodoId);
 
-        // Nodo actual (para preseleccionar el padre en el formulario)
+
         Caracteristica nodoPadre = (nodoId != null) ? service.caracteristicaById(nodoId) : null;
 
         model.addAttribute("hijos",      hijos);
@@ -125,7 +112,7 @@ public class ControllerAdmin {
 
         service.guardarCaracteristica(nueva);
 
-        // Redirige al mismo nivel donde se hizo la acción
+
         if (nodoId != null) {
             return "redirect:/admin/caracteristicas?nodoId=" + nodoId;
         }
@@ -137,7 +124,7 @@ public class ControllerAdmin {
             @PathVariable Long id,
             @RequestParam(value = "nodoId", required = false) Long nodoId) {
 
-        // Antes de eliminar, guardamos el padre para redirigir al nivel correcto
+
         Long padreIdRedireccion = null;
         try {
             Caracteristica c = service.caracteristicaById(id);
@@ -148,16 +135,14 @@ public class ControllerAdmin {
 
         service.eliminarCaracteristica(id);
 
-        // Si venía navegando desde un nodo padre, volver a ese nivel
+
         if (padreIdRedireccion != null) {
             return "redirect:/admin/caracteristicas?nodoId=" + padreIdRedireccion;
         }
         return "redirect:/admin/caracteristicas";
     }
 
-    // ----------------------------------------------------------------
-    // REPORTE PDF puestos por mes
-    // ----------------------------------------------------------------
+
     @GetMapping("/reporte")
     public String reporte(Model model) {
         model.addAttribute("datos", service.reportePuestosPorMes());

@@ -22,12 +22,8 @@ public class ControllerOferente {
     @Autowired
     private Service service;
 
-    /**
-     * Carpeta FUERA del classpath para que Spring Boot la sirva
-     * en runtime sin necesidad de reempaquetar el JAR.
-     * Se crea automáticamente si no existe.
-     * WebConfig mapea "/curricula/**" → esta carpeta.
-     */
+
+
     private static final String PDF_DIR = "uploads/curricula/";
 
     private Oferente getOferente(UserDetails ud) {
@@ -49,9 +45,7 @@ public class ControllerOferente {
         return "redirect:/oferente/buscar";
     }
 
-    // ----------------------------------------------------------------
-    // DASHBOARD
-    // ----------------------------------------------------------------
+
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal UserDetails ud, Model model) {
         Oferente oferente = getOferente(ud);
@@ -60,9 +54,7 @@ public class ControllerOferente {
         return "presentation/oferente/ViewDashboard";
     }
 
-    // ----------------------------------------------------------------
-    // HABILIDADES  –  navegación por árbol
-    // ----------------------------------------------------------------
+
     private List<Caracteristica> buildRuta(Long nodoId) {
         if (nodoId == null) return Collections.emptyList();
         List<Caracteristica> ruta = new ArrayList<>();
@@ -168,9 +160,7 @@ public class ControllerOferente {
         return "redirect:" + redirect;
     }
 
-    // ----------------------------------------------------------------
-    // SUBIR CURRÍCULO PDF
-    // ----------------------------------------------------------------
+
     @GetMapping("/curriculum")
     public String curriculumGet(@AuthenticationPrincipal UserDetails ud, Model model) {
         model.addAttribute("oferente", getOferente(ud));
@@ -194,11 +184,11 @@ public class ControllerOferente {
             Path dir = Paths.get(PDF_DIR);
             Files.createDirectories(dir);
 
-            // Timestamp en el nombre → rompe caché del navegador en cada subida
+
             String nombreArchivo = "cv_" + oferente.getId()
                     + "_" + System.currentTimeMillis() + ".pdf";
 
-            // Eliminar el PDF anterior para no acumular archivos huérfanos
+
             if (oferente.getCurriculumPdf() != null) {
                 String nombreAnterior = oferente.getCurriculumPdf()
                         .replace("/curricula/", "");
@@ -209,7 +199,7 @@ public class ControllerOferente {
                     dir.resolve(nombreArchivo),
                     StandardCopyOption.REPLACE_EXISTING);
 
-            // URL pública mapeada por WebConfig ("/curricula/**")
+
             oferente.setCurriculumPdf("/curricula/" + nombreArchivo);
             service.guardarOferente(oferente);
 
@@ -221,9 +211,7 @@ public class ControllerOferente {
         return "redirect:/oferente/curriculum";
     }
 
-    // ----------------------------------------------------------------
-    // BUSCAR PUESTOS  –  por texto Y por características
-    // ----------------------------------------------------------------
+
     @GetMapping("/buscar")
     public String buscarGet(
             @AuthenticationPrincipal UserDetails ud,

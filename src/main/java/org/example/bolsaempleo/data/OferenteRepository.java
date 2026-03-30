@@ -13,9 +13,9 @@ public interface OferenteRepository extends JpaRepository<Oferente, Long> {
 
     Optional<Oferente> findByUsuario(Usuario usuario);
 
-    /** Oferentes pendientes de aprobación (para el admin) */
+
     List<Oferente> findByAprobadoFalse();
 
-    /** Oferentes ya aprobados */
+
     List<Oferente> findByAprobadoTrue();
 }

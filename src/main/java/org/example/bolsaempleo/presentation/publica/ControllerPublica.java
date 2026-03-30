@@ -28,35 +28,31 @@ public class ControllerPublica {
         return "";
     }
 
-    // ----------------------------------------------------------------
-    // Portada pública
-    // ----------------------------------------------------------------
+
     @GetMapping("/inicio")
     public String inicio(Model model) {
         model.addAttribute("puestosRecientes", service.puestosRecientes());
         return "presentation/publica/ViewInicio";
     }
 
-    // ----------------------------------------------------------------
-    // Búsqueda pública de puestos
-    // ----------------------------------------------------------------
+
     @GetMapping("/buscar")
     public String buscarGet(Model model,
                             @RequestParam(value = "textoBusqueda", required = false) String textoBusqueda,
                             @RequestParam(value = "caracIds", required = false) List<Long> caracIds) {
 
-        // Árbol de categorías para los filtros de la vista
+
         model.addAttribute("caracteristicas",       service.caracteristicasRaiz());
         model.addAttribute("caracIdsSeleccionadas", caracIds != null ? caracIds : new ArrayList<>());
 
-        // Búsqueda por características (devuelve Object[]{Puesto, coincidencias})
+
         if (caracIds != null && !caracIds.isEmpty()) {
             List<Object[]> resultados = service.buscarPuestosPublicosPorCaracteristicas(caracIds);
             model.addAttribute("resultados",          resultados);
             model.addAttribute("totalSeleccionadas",  caracIds.size());
         }
 
-        // Búsqueda por texto (independiente del filtro de características)
+
         if (textoBusqueda != null && !textoBusqueda.isBlank()) {
             model.addAttribute("resultadosTexto", service.buscarPuestosPublicos(textoBusqueda));
             model.addAttribute("textoBusqueda",   textoBusqueda);
@@ -87,9 +83,7 @@ public class ControllerPublica {
         return "presentation/publica/ViewBuscar";
     }
 
-    // ----------------------------------------------------------------
-    // Ver detalle de un puesto público
-    // ----------------------------------------------------------------
+
     @GetMapping("/puesto/{id}")
     public String verPuesto(@PathVariable Long id, Model model,
                             @AuthenticationPrincipal UserDetails ud) {

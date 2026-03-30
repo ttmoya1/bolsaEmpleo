@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class RootController {
 
-    // ----------------------------------------------------------------
-    // Redirige / → portada pública
-    // ----------------------------------------------------------------
+
     @GetMapping("/")
     public String root() {
         return "redirect:/publica/inicio";
@@ -18,10 +16,7 @@ public class RootController {
 
 
 
-    // ----------------------------------------------------------------
-    // /dashboard  → redirige al panel correcto según el rol del usuario
-    // Spring Security redirige aquí después del login exitoso
-    // ----------------------------------------------------------------
+
     @GetMapping("/dashboard")
     public String dashboard(Authentication auth) {
         if (auth == null) return "redirect:/publica/inicio";
@@ -38,17 +33,13 @@ public class RootController {
         return "redirect:/publica/inicio";
     }
 
-    // ----------------------------------------------------------------
-    // Página de login
-    // ----------------------------------------------------------------
+
     @GetMapping("/login")
     public String login() {
         return "presentation/login/ViewLogin";
     }
 
-    // ----------------------------------------------------------------
-    // Página de acceso denegado
-    // ----------------------------------------------------------------
+
     @GetMapping("/acceso-denegado")
     public String accesoDenegado() {
         return "presentation/login/ViewAccesoDenegado";

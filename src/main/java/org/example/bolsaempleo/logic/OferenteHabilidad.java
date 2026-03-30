@@ -22,11 +22,7 @@ public class OferenteHabilidad {
     @JoinColumn(name = "caracteristica_id", nullable = false)
     private Caracteristica caracteristica;
 
-    /**
-     * 1 = Básico
-     * 2 = Intermedio
-     * 3 = Avanzado
-     */
+
     @Column(nullable = false)
     private int nivel = 1;
 }

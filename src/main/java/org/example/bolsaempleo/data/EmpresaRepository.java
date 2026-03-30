@@ -11,9 +11,9 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
 
     Optional<Empresa> findByUsuario(Usuario usuario);
 
-    /** Empresas pendientes de aprobación (para el admin) */
+
     List<Empresa> findByAprobadaFalse();
 
-    /** Empresas ya aprobadas */
+
     List<Empresa> findByAprobadaTrue();
 }

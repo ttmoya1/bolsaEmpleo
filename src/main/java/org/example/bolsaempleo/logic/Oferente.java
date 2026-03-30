@@ -43,7 +43,7 @@ public class Oferente {
     @Column(nullable = false)
     private boolean aprobado = false;
 
-    /** Ruta relativa del PDF subido, ej: "curricula/123.pdf" */
+
     @Column(name = "curriculum_pdf", length = 255)
     private String curriculumPdf;
 }

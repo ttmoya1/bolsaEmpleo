@@ -19,7 +19,7 @@ public class Usuario {
     @Column(nullable = false, length = 255)
     private String clave;
 
-    /** ADM | EMP | OFE */
+
     @Column(nullable = false, length = 5)
     private String rol;
 

@@ -13,32 +13,19 @@ import java.util.Optional;
 
 public interface OferenteHabilidadRepository extends JpaRepository<OferenteHabilidad, Long> {
 
-    /** Todas las habilidades de un oferente */
+
     List<OferenteHabilidad> findByOferenteId(Long oferenteId);
 
-    /** Busca una habilidad específica del oferente (para evitar duplicados) */
+
     Optional<OferenteHabilidad> findByOferenteIdAndCaracteristicaId(Long oferenteId, Long caracteristicaId);
 
-    /** Elimina todas las habilidades de un oferente (útil al reemplazar la lista completa) */
+
     @Modifying
     @Transactional
     @Query("DELETE FROM OferenteHabilidad oh WHERE oh.oferente.id = :oferenteId")
     void deleteByOferenteId(Long oferenteId);
 
-    /**
-     * Busca oferentes aprobados que cumplan con los requisitos de un puesto.
-     *
-     * Para cada par (característica, nivelDeseado) del puesto, el oferente
-     * debe tener esa característica con nivel >= nivelDeseado.
-     *
-     * La consulta devuelve los oferentes que coincidan en AL MENOS
-     * tantos requisitos como se indique en :minCoincidencias.
-     *
-     * Uso típico: pasar el total de requisitos del puesto para exigir
-     * coincidencia completa, o un número menor para coincidencia parcial.
-     *
-     * Devuelve [Oferente, coincidencias (long)] ordenado de mayor a menor coincidencia.
-     */
+
     @Query("""
            SELECT oh.oferente, COUNT(oh) AS coincidencias
            FROM OferenteHabilidad oh

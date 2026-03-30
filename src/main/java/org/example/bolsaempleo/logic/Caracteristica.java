@@ -17,7 +17,7 @@ public class Caracteristica {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** NULL → nodo raíz (categoría principal) */
+
     @ManyToOne
     @JoinColumn(name = "padre_id")
     private Caracteristica padre;
@@ -26,11 +26,11 @@ public class Caracteristica {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    /** Hijos directos — útil para construir el árbol en la vista */
+
     @OneToMany(mappedBy = "padre", cascade = CascadeType.ALL)
     private List<Caracteristica> hijos = new ArrayList<>();
 
-    /** Conveniencia: true si es nodo raíz */
+
     @Transient
     public boolean isRaiz() {
         return padre == null;

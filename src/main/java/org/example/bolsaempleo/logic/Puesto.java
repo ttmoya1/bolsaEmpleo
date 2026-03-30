@@ -29,10 +29,7 @@ public class Puesto {
     // Double es tipo flotante en SQL → NO usar precision/scale (Hibernate 7 lo rechaza)
     private Double salario;
 
-    /**
-     * PUB = público (visible para todos)
-     * PRI = privado (solo oferentes aprobados)
-     */
+
     @Column(name = "tipo_publicacion", nullable = false, length = 3)
     private String tipoPublicacion = "PUB";
 

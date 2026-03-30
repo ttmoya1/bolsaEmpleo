@@ -25,7 +25,7 @@ public class Aplicacion {
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
 
-    /** PEN=Pendiente, ACE=Aceptado, REC=Rechazado */
+
     @Column(nullable = false, length = 10)
     private String estado = "PEN";
 }
