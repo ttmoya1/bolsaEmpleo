@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -21,8 +22,6 @@ public class ControllerOferente {
 
     @Autowired
     private Service service;
-
-
 
     private static final String PDF_DIR = "uploads/curricula/";
 
@@ -74,21 +73,15 @@ public class ControllerOferente {
 
         Oferente oferente = getOferente(ud);
 
-        List<Caracteristica> hijos;
-        if (nodoId == null) {
-            hijos = service.caracteristicasRaiz();
-        } else {
-            hijos = service.hijosDe(nodoId);
-        }
-
-        List<Caracteristica> ruta        = buildRuta(nodoId);
-        List<Caracteristica> disponibles = hijos;
+        List<Caracteristica> hijos = (nodoId == null)
+                ? service.caracteristicasRaiz()
+                : service.hijosDe(nodoId);
 
         model.addAttribute("oferente",    oferente);
         model.addAttribute("habilidades", service.habilidadesByOferente(oferente.getId()));
         model.addAttribute("hijos",       hijos);
-        model.addAttribute("disponibles", disponibles);
-        model.addAttribute("ruta",        ruta);
+        model.addAttribute("disponibles", hijos);
+        model.addAttribute("ruta",        buildRuta(nodoId));
         model.addAttribute("nodoId",      nodoId);
 
         return "presentation/oferente/ViewHabilidades";
@@ -97,12 +90,11 @@ public class ControllerOferente {
     @PostMapping("/habilidades/guardar")
     public String habilidadesPost(
             @AuthenticationPrincipal UserDetails ud,
-            @RequestParam("caracId")                           Long  caracId,
-            @RequestParam(value = "nivel", defaultValue = "1") int   nivel,
-            @RequestParam(value = "nodoId", required = false)  Long  nodoId) {
+            @RequestParam("caracId")                           Long caracId,
+            @RequestParam(value = "nivel", defaultValue = "1") int  nivel,
+            @RequestParam(value = "nodoId", required = false)  Long nodoId) {
 
         Oferente oferente = getOferente(ud);
-
         List<OferenteHabilidad> existentes = service.habilidadesByOferente(oferente.getId());
         List<OferenteHabilidad> nueva      = new ArrayList<>();
 
@@ -133,14 +125,29 @@ public class ControllerOferente {
         return "redirect:" + redirect;
     }
 
-    @GetMapping("/habilidades/eliminar/{caracId}")
+
+    @GetMapping("/habilidades/confirmar-eliminar/{caracId}")
+    public String confirmarEliminarHabilidad(
+            @AuthenticationPrincipal UserDetails ud,
+            @PathVariable Long caracId,
+            @RequestParam(value = "nodoId", required = false) Long nodoId,
+            Model model) {
+
+        Caracteristica caract = service.caracteristicaById(caracId);
+        model.addAttribute("caracId",        caracId);
+        model.addAttribute("nombreHabilidad", caract.getNombre());
+        model.addAttribute("nodoId",         nodoId);
+        return "presentation/oferente/ViewConfirmarEliminarHabilidad";
+    }
+
+
+    @PostMapping("/habilidades/eliminar/{caracId}")
     public String eliminarHabilidad(
             @AuthenticationPrincipal UserDetails ud,
             @PathVariable Long caracId,
             @RequestParam(value = "nodoId", required = false) Long nodoId) {
 
         Oferente oferente = getOferente(ud);
-
         List<OferenteHabilidad> existentes = service.habilidadesByOferente(oferente.getId());
         List<OferenteHabilidad> nueva      = new ArrayList<>();
 
@@ -184,10 +191,8 @@ public class ControllerOferente {
             Path dir = Paths.get(PDF_DIR);
             Files.createDirectories(dir);
 
-
             String nombreArchivo = "cv_" + oferente.getId()
                     + "_" + System.currentTimeMillis() + ".pdf";
-
 
             if (oferente.getCurriculumPdf() != null) {
                 String nombreAnterior = oferente.getCurriculumPdf()
@@ -198,7 +203,6 @@ public class ControllerOferente {
             Files.copy(archivo.getInputStream(),
                     dir.resolve(nombreArchivo),
                     StandardCopyOption.REPLACE_EXISTING);
-
 
             oferente.setCurriculumPdf("/curricula/" + nombreArchivo);
             service.guardarOferente(oferente);
@@ -227,7 +231,6 @@ public class ControllerOferente {
             model.addAttribute("resultadosCarac",    service.buscarPuestosPublicosPorCaracteristicas(caracIds));
             model.addAttribute("totalSeleccionadas", caracIds.size());
         }
-
         if (!texto.isBlank()) {
             model.addAttribute("resultados", service.buscarTodosPuestos(texto));
         }
@@ -250,7 +253,6 @@ public class ControllerOferente {
             model.addAttribute("resultadosCarac",    service.buscarPuestosPublicosPorCaracteristicas(caracIds));
             model.addAttribute("totalSeleccionadas", caracIds.size());
         }
-
         if (!texto.isBlank()) {
             model.addAttribute("resultados", service.buscarTodosPuestos(texto));
         }

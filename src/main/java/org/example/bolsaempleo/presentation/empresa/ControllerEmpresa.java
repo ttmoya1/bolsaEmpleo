@@ -132,11 +132,22 @@ public class ControllerEmpresa {
     }
 
 
+
     @GetMapping("/candidato/{id}")
-    public String verCandidato(@PathVariable Long id, Model model) {
-        Oferente oferente = service.oferenteById(id);
-        model.addAttribute("oferente",    oferente);
+    public String verCandidato(
+            @PathVariable Long id,
+            @RequestParam(value = "puestoId", required = false) Long puestoId,
+            Model model) {
+
+        model.addAttribute("oferente",    service.oferenteById(id));
         model.addAttribute("habilidades", service.habilidadesByOferente(id));
+
+        // Construye la URL de regreso de forma concreta, sin JS
+        String urlRegresar = (puestoId != null)
+                ? "/empresa/puestos/" + puestoId + "/candidatos"
+                : "/empresa/puestos";
+        model.addAttribute("urlRegresar", urlRegresar);
+
         return "presentation/empresa/ViewDetalleCandidato";
     }
 

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Confirmar eliminación')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+
+    <div class="form w50">
+        <div class="section">Confirmar eliminación</div>
+
+        <div style="padding:16px 0;">
+            <p>¿Está seguro de que desea eliminar la característica
+                <strong th:text="${caracteristica.nombre}"></strong>?
+            </p>
+            <p th:if="${!caracteristica.hijos.isEmpty()}"
+               style="color:#c0392b;">
+                Esta categoría contiene subcategorías. Se eliminarán también todos sus descendientes.
+            </p>
+        </div>
+
+
+        <form method="POST"
+              th:action="@{/admin/caracteristicas/eliminar/{id}(id=${caracteristica.id})}">
+            <input type="hidden" name="nodoId" th:value="${nodoId}"/>
+            <input type="submit" value="Sí, eliminar" class="button delete"/>
+        </form>
+
+
+        <a th:href="${nodoId != null
+                       ? '/admin/caracteristicas?nodoId=' + nodoId
+                       : '/admin/caracteristicas'}"
+           class="button" style="margin-left:8px;">Cancelar</a>
+    </div>
+
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

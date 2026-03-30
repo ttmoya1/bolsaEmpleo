@@ -1,12 +1,10 @@
 package org.example.bolsaempleo.presentation.admin;
 
-import jakarta.validation.Valid;
 import org.example.bolsaempleo.logic.Caracteristica;
 import org.example.bolsaempleo.logic.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -73,18 +71,12 @@ public class ControllerAdmin {
             @RequestParam(value = "nodoId", required = false) Long nodoId,
             Model model) {
 
+        List<Caracteristica> hijos = (nodoId == null)
+                ? service.caracteristicasRaiz()
+                : service.hijosDe(nodoId);
 
-        List<Caracteristica> hijos;
-        if (nodoId == null) {
-            hijos = service.caracteristicasRaiz();
-        } else {
-            hijos = service.hijosDe(nodoId);
-        }
-
-        List<Caracteristica> ruta = buildRuta(nodoId);
-
-
-        Caracteristica nodoPadre = (nodoId != null) ? service.caracteristicaById(nodoId) : null;
+        List<Caracteristica> ruta     = buildRuta(nodoId);
+        Caracteristica       nodoPadre = (nodoId != null) ? service.caracteristicaById(nodoId) : null;
 
         model.addAttribute("hijos",      hijos);
         model.addAttribute("ruta",       ruta);
@@ -97,33 +89,39 @@ public class ControllerAdmin {
 
     @PostMapping("/caracteristicas/guardar")
     public String guardarCaracteristica(
-            @RequestParam(value = "nombre") String nombre,
-            @RequestParam(value = "padreId", required = false) Long padreId,
-            @RequestParam(value = "nodoId",  required = false) Long nodoId) {
+            @RequestParam("nombre")                           String nombre,
+            @RequestParam(value = "padreId", required = false) Long   padreId,
+            @RequestParam(value = "nodoId",  required = false) Long   nodoId) {
 
         Caracteristica nueva = new Caracteristica();
         nueva.setNombre(nombre.trim());
-
-        if (padreId != null && padreId != 0L) {
-            nueva.setPadre(service.caracteristicaById(padreId));
-        } else {
-            nueva.setPadre(null);
-        }
-
+        nueva.setPadre((padreId != null && padreId != 0L)
+                ? service.caracteristicaById(padreId)
+                : null);
         service.guardarCaracteristica(nueva);
 
-
-        if (nodoId != null) {
-            return "redirect:/admin/caracteristicas?nodoId=" + nodoId;
-        }
-        return "redirect:/admin/caracteristicas";
+        return (nodoId != null)
+                ? "redirect:/admin/caracteristicas?nodoId=" + nodoId
+                : "redirect:/admin/caracteristicas";
     }
 
-    @GetMapping("/caracteristicas/eliminar/{id}")
+
+    @GetMapping("/caracteristicas/confirmar-eliminar/{id}")
+    public String confirmarEliminar(
+            @PathVariable Long id,
+            @RequestParam(value = "nodoId", required = false) Long nodoId,
+            Model model) {
+
+        model.addAttribute("caracteristica", service.caracteristicaById(id));
+        model.addAttribute("nodoId", nodoId);
+        return "presentation/admin/ViewConfirmarEliminarCaracteristica";
+    }
+
+
+    @PostMapping("/caracteristicas/eliminar/{id}")
     public String eliminarCaracteristica(
             @PathVariable Long id,
             @RequestParam(value = "nodoId", required = false) Long nodoId) {
-
 
         Long padreIdRedireccion = null;
         try {
@@ -135,11 +133,9 @@ public class ControllerAdmin {
 
         service.eliminarCaracteristica(id);
 
-
-        if (padreIdRedireccion != null) {
-            return "redirect:/admin/caracteristicas?nodoId=" + padreIdRedireccion;
-        }
-        return "redirect:/admin/caracteristicas";
+        return (padreIdRedireccion != null)
+                ? "redirect:/admin/caracteristicas?nodoId=" + padreIdRedireccion
+                : "redirect:/admin/caracteristicas";
     }
 
 

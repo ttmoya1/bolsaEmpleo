@@ -10,27 +10,20 @@
 
     <div style="display:flex; gap:12px; width:95%; align-items:flex-start;">
 
-        <!-- ══════════════════════════════════════════════════════════
-             PANEL CENTRAL — árbol navegable
-        ══════════════════════════════════════════════════════════ -->
+
         <div style="flex:1; background:#f2f2f2; border:1px solid #ccc;
                     border-radius:8px; overflow:hidden;">
 
-            <!--
-                BREADCRUMB
-                "Raíz" es virtual: apunta a /admin/caracteristicas sin nodoId.
-            -->
+
             <div style="background:#e0e8f0; padding:7px 12px; font-size:12px;
                         border-bottom:1px solid #ccc; display:flex; flex-wrap:wrap;
                         align-items:center; gap:4px; min-height:34px;">
 
-                <!-- Raíz virtual — siempre visible -->
                 <a href="/admin/caracteristicas"
                    style="color:#2c5f8a; font-weight:bold; text-decoration:none;">
                     Raíz
                 </a>
 
-                <!-- Segmentos reales -->
                 <th:block th:each="nodo : ${ruta}">
                     <span style="color:#999; padding:0 2px;">›</span>
                     <a th:href="@{/admin/caracteristicas(nodoId=${nodo.id})}"
@@ -40,7 +33,7 @@
                 </th:block>
             </div>
 
-            <!-- Hijos del nodo actual -->
+
             <div style="padding:10px; min-height:220px;">
 
                 <div th:if="${#lists.isEmpty(hijos)}"
@@ -48,7 +41,7 @@
                     No hay subcategorías en este nivel.
                 </div>
 
-                <!-- Nodos con hijos propios: fondo blanco + flecha › -->
+
                 <div th:each="hijo : ${hijos}" th:if="${!hijo.hijos.isEmpty()}">
                     <div style="display:flex; align-items:center; justify-content:space-between;
                                 padding:7px 10px; border-radius:6px; margin-bottom:3px;
@@ -58,32 +51,30 @@
                             <span th:text="${hijo.nombre}"></span>
                             <span style="color:#999; font-size:12px; margin-left:6px;">›</span>
                         </a>
-                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${hijo.id}, nodoId=${nodoId})}"
+                        <!-- SIN JS: enlace a página de confirmación intermedia -->
+                        <a th:href="@{/admin/caracteristicas/confirmar-eliminar/{id}(id=${hijo.id}, nodoId=${nodoId})}"
                            style="color:#c0392b; font-size:18px; text-decoration:none;
-                                  padding:0 6px; line-height:1; flex-shrink:0;"
-                           onclick="return confirm('¿Eliminar esta categoría y todos sus descendientes?')">×</a>
+                                  padding:0 6px; line-height:1; flex-shrink:0;">×</a>
                     </div>
                 </div>
 
-                <!-- Nodos hoja: fondo azul claro -->
+                <!-- Nodos hoja -->
                 <div th:each="hijo : ${hijos}" th:if="${hijo.hijos.isEmpty()}">
                     <div style="display:flex; align-items:center; justify-content:space-between;
                                 padding:7px 10px; border-radius:6px; margin-bottom:3px;
                                 background:#e8f0f7; border:1px solid #2c5f8a;">
                         <span th:text="${hijo.nombre}"
                               style="color:#1a3d5c; font-size:14px; flex:1;"></span>
-                        <a th:href="@{/admin/caracteristicas/eliminar/{id}(id=${hijo.id}, nodoId=${nodoId})}"
+                        <!-- SIN JS: enlace a página de confirmación intermedia -->
+                        <a th:href="@{/admin/caracteristicas/confirmar-eliminar/{id}(id=${hijo.id}, nodoId=${nodoId})}"
                            style="color:#c0392b; font-size:18px; text-decoration:none;
-                                  padding:0 6px; line-height:1; flex-shrink:0;"
-                           onclick="return confirm('¿Eliminar esta característica?')">×</a>
+                                  padding:0 6px; line-height:1; flex-shrink:0;">×</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════════════
-             PANEL DERECHO — agregar nueva característica
-        ══════════════════════════════════════════════════════════ -->
+
         <div style="width:260px; flex-shrink:0; background:#f2f2f2;
                     border:1px solid #ccc; border-radius:8px; overflow:hidden;">
 
@@ -94,26 +85,18 @@
             <div style="padding:12px; min-height:220px;">
                 <form method="POST" action="/admin/caracteristicas/guardar">
 
-                    <!-- nodoId para mantener la posición al redirigir -->
                     <input type="hidden" name="nodoId" th:value="${nodoId}"/>
 
-                    <!-- Nombre -->
                     <div style="margin-bottom:10px;">
-                        <div style="font-size:12px; color:#555; margin-bottom:4px;">
-                            Nombre
-                        </div>
+                        <div style="font-size:12px; color:#555; margin-bottom:4px;">Nombre</div>
                         <input type="text" name="nombre" required
                                placeholder="Ej: React, Inglés..."
                                style="width:100%; box-sizing:border-box; font-size:13px;"/>
                     </div>
 
-                    <!-- Categoría padre -->
                     <div style="margin-bottom:12px;">
-                        <div style="font-size:12px; color:#555; margin-bottom:4px;">
-                            Categoría padre
-                        </div>
+                        <div style="font-size:12px; color:#555; margin-bottom:4px;">Categoría padre</div>
                         <select name="padreId" style="width:100%; font-size:13px;">
-
                             <option th:value="${nodoId != null ? nodoId : 0}"
                                     th:text="${nodoPadre != null ? nodoPadre.nombre : '── Ninguno (raíz) ──'}">
                             </option>

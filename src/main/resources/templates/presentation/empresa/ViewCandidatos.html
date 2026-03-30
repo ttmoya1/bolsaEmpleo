@@ -8,7 +8,7 @@
     <h2>Candidatos para: <span th:text="${puesto.descripcion.length() > 60
         ? puesto.descripcion.substring(0,60)+'...' : puesto.descripcion}"></span></h2>
 
-    <!-- Filtro de coincidencias mínimas -->
+
     <div class="form w25">
         <form method="GET" th:action="@{/empresa/puestos/{id}/candidatos(id=${puesto.id})}">
             <div class="section">Filtrar por coincidencias</div>
@@ -39,7 +39,9 @@
             <td th:text="${fila[0].lugarResidencia}"></td>
             <td th:text="${fila[1] + ' / ' + totalRequisitos}"></td>
             <td>
-                <a th:href="@{/empresa/candidato/{id}(id=${fila[0].id})}" class="button">Ver</a>
+
+                <a th:href="@{/empresa/candidato/{id}(id=${fila[0].id}, puestoId=${puesto.id})}"
+                   class="button">Ver</a>
             </td>
         </tr>
         </tbody>
@@ -68,7 +70,9 @@
             <td>
                 <a th:href="@{/empresa/aplicaciones/estado/{id}/ACE(id=${a.id})}" class="button">Aceptar</a>
                 <a th:href="@{/empresa/aplicaciones/estado/{id}/REC(id=${a.id})}" class="button">Rechazar</a>
-                <a th:href="@{/empresa/candidato/{id}(id=${a.oferente.id})}" class="button">Ver perfil</a>
+
+                <a th:href="@{/empresa/candidato/{id}(id=${a.oferente.id}, puestoId=${puesto.id})}"
+                   class="button">Ver perfil</a>
             </td>
         </tr>
         </tbody>
@@ -76,7 +80,6 @@
     <p th:if="${#lists.isEmpty(aplicaciones)}" class="sin-resultados">
         No hay aplicaciones para este puesto.
     </p>
-
 
     <a th:href="@{/empresa/dashboard}" class="button">Regresar</a>
 </main>

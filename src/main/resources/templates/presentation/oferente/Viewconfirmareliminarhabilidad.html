@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{presentation/fragments :: head('Confirmar eliminación')}"></head>
+<body>
+<header th:replace="~{presentation/fragments :: header}"></header>
+<nav    th:replace="~{presentation/fragments :: nav}"></nav>
+<main>
+
+  <div class="form w50">
+    <div class="section">Confirmar eliminación de habilidad</div>
+
+    <div style="padding:16px 0;">
+      <p>¿Está seguro de que desea eliminar la habilidad
+        <strong th:text="${nombreHabilidad}"></strong>
+        de su perfil?
+      </p>
+    </div>
+
+
+    <form method="POST"
+          th:action="@{/oferente/habilidades/eliminar/{cid}(cid=${caracId})}">
+      <input type="hidden" name="nodoId" th:value="${nodoId}"/>
+      <input type="submit" value="Sí, eliminar" class="button delete"/>
+    </form>
+
+
+    <a th:href="${nodoId != null
+                       ? '/oferente/habilidades?nodoId=' + nodoId
+                       : '/oferente/habilidades'}"
+       class="button" style="margin-left:8px;">Cancelar</a>
+  </div>
+
+</main>
+<footer th:replace="~{presentation/fragments :: footer}"></footer>
+</body>
+</html>

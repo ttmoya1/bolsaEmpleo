@@ -10,9 +10,7 @@
 
     <div style="display:flex; gap:12px; width:95%; align-items:flex-start;">
 
-        <!-- ══════════════════════════════════════════════════════════
-             PANEL IZQUIERDO — mis características asociadas
-        ══════════════════════════════════════════════════════════ -->
+
         <div style="width:220px; flex-shrink:0; background:#f2f2f2;
                     border:1px solid #ccc; border-radius:8px; overflow:hidden;">
 
@@ -40,35 +38,28 @@
                             <span th:case="3">Avanzado</span>
                         </div>
                     </div>
-                    <a th:href="@{/oferente/habilidades/eliminar/{cid}(cid=${h.caracteristica.id}, nodoId=${nodoId})}"
-                       style="color:#c0392b; font-size:16px; text-decoration:none; padding:0 4px; line-height:1;"
-                       onclick="return confirm('¿Eliminar esta habilidad?')">×</a>
+
+                    <a th:href="@{/oferente/habilidades/confirmar-eliminar/{cid}(cid=${h.caracteristica.id}, nodoId=${nodoId})}"
+                       style="color:#c0392b; font-size:16px; text-decoration:none;
+                              padding:0 4px; line-height:1;">×</a>
                 </div>
             </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════════════
-             PANEL CENTRAL — árbol navegable
-        ══════════════════════════════════════════════════════════ -->
+
         <div style="flex:1; background:#f2f2f2; border:1px solid #ccc;
                     border-radius:8px; overflow:hidden;">
 
-            <!--
-                BREADCRUMB
-                "Raíz" es virtual: apunta a /oferente/habilidades sin nodoId.
-                Siempre se muestra. Luego vienen los nodos de la ruta real.
-            -->
+
             <div style="background:#e0e8f0; padding:7px 12px; font-size:12px;
                         border-bottom:1px solid #ccc; display:flex; flex-wrap:wrap;
                         align-items:center; gap:4px; min-height:34px;">
 
-                <!-- Raíz virtual — siempre visible, enlace sin parámetros -->
                 <a href="/oferente/habilidades"
                    style="color:#2c5f8a; font-weight:bold; text-decoration:none;">
                     Raíz
                 </a>
 
-                <!-- Segmentos reales: Lenguajes › Java, etc. -->
                 <th:block th:each="nodo : ${ruta}">
                     <span style="color:#999; padding:0 2px;">›</span>
                     <a th:href="@{/oferente/habilidades(nodoId=${nodo.id})}"
@@ -78,7 +69,7 @@
                 </th:block>
             </div>
 
-            <!-- Hijos del nodo actual -->
+
             <div style="padding:10px; min-height:220px;">
 
                 <div th:if="${#lists.isEmpty(hijos)}"
@@ -86,7 +77,7 @@
                     Sin subcategorías en este nivel.
                 </div>
 
-                <!-- Nodos con hijos propios: fondo blanco + flecha › -->
+
                 <div th:each="hijo : ${hijos}" th:if="${!hijo.hijos.isEmpty()}">
                     <a th:href="@{/oferente/habilidades(nodoId=${hijo.id})}"
                        style="display:flex; align-items:center; justify-content:space-between;
@@ -98,7 +89,7 @@
                     </a>
                 </div>
 
-                <!-- Nodos hoja: fondo azul claro -->
+
                 <div th:each="hijo : ${hijos}" th:if="${hijo.hijos.isEmpty()}">
                     <a th:href="@{/oferente/habilidades(nodoId=${hijo.id})}"
                        style="display:flex; align-items:center; padding:7px 10px;
@@ -111,9 +102,7 @@
             </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════════════
-             PANEL DERECHO — agregar habilidad
-        ══════════════════════════════════════════════════════════ -->
+
         <div style="width:230px; flex-shrink:0; background:#f2f2f2;
                     border:1px solid #ccc; border-radius:8px; overflow:hidden;">
 
@@ -131,10 +120,6 @@
                 <form th:if="${!#lists.isEmpty(disponibles)}"
                       method="POST" action="/oferente/habilidades/guardar">
 
-                    <!--
-                        nodoId puede ser null cuando estamos en la raíz virtual.
-                        Se pasa vacío en ese caso y el controlador lo ignora.
-                    -->
                     <input type="hidden" name="nodoId" th:value="${nodoId}"/>
 
                     <div style="margin-bottom:8px;">

@@ -46,7 +46,8 @@
     </table>
     <p th:if="${#lists.isEmpty(habilidades)}" class="sin-resultados">Sin habilidades registradas.</p>
 
-    <a href="javascript:history.back()" class="button">Regresar</a>
+
+    <a th:href="${urlRegresar}" class="button">Regresar</a>
 </main>
 <footer th:replace="~{presentation/fragments :: footer}"></footer>
 </body>
